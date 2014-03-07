@@ -62,7 +62,7 @@
 <a name="curl"></a>
 <h3>curl</h3>
 <pre>
-curl -X POST http://indra.mullins.microbiol.washington.edu/seq-locator/within/hiv \
+curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
      --data sequence=SLYNTVAVLYYVHQR \
      --data sequence=TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG
 </pre>
@@ -106,7 +106,7 @@ use LWP::UserAgent;
 
 my $agent    = LWP::UserAgent->new( agent => 'you@example.com' );
 my $response = $agent->post(
-    "http://indra.mullinslab.microbiol.washington.edu/seqlocator/within/hiv" => [
+    "http://indra.mullinslab.microbiol.washington.edu/locate-sequence/within/hiv" => [
         sequence => "TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG",
     ],
 );
