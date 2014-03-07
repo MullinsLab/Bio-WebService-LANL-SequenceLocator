@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-package HIVSequenceLocator;
+package Bio::Web::HIVSequenceLocator;
 use Web::Simple;
 
 use FindBin;
@@ -58,11 +58,8 @@ sub dispatch_request {
         return error(422 => 'At least one value for "sequence" is needed.')
             unless $sequences and @$sequences;
 
-        my $content = $self->lanl_locate($sequences)
-            or return error(503 => 'Backend request to LANL failed');
-
-        my $results = $self->lanl_parse_html($content)
-            or return error(500 => "Couldn't parse HTML returned by LANL, sorry!  Contact @{[ $self->contact ]}.");
+        my $results = $self->lanl_locate($sequences)
+            or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
 
         my $json = eval { encode_json($results) };
         if ($@ or not $json) {
@@ -99,6 +96,15 @@ sub request {
 sub lanl_locate {
     my ($self, $sequences) = @_;
 
+    my $content = $self->lanl_submit($sequences)
+        or return;
+
+    return $self->lanl_parse($content);
+}
+
+sub lanl_submit {
+    my ($self, $sequences) = @_;
+
     # Submit multiple sequences at once using FASTA
     my $fasta = join "\n", map {
         ("> sequence_$_", $sequences->[$_ - 1])
@@ -120,7 +126,7 @@ sub lanl_locate {
     );
 }
 
-sub lanl_parse_html {
+sub lanl_parse {
     my ($self, $content) = @_;
     my @results;
 
