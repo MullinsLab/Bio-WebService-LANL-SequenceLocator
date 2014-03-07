@@ -52,8 +52,11 @@ has lanl_endpoint => (
 );
 
 sub dispatch_request {
-    sub (POST + /within/hiv + %@sequence=) {
+    sub (POST + /within/hiv + %@sequence~) {
         my ($self, $sequences) = @_;
+
+        return error(422 => 'At least one value for "sequence" is needed.')
+            unless $sequences and @$sequences;
 
         my $content = $self->lanl_locate($sequences)
             or return error(503 => 'Backend request to LANL failed');
