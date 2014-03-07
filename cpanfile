@@ -10,7 +10,6 @@ requires 'Web::Simple';
 
 feature 'deployment', 'Quick deployment with Server::Starter + FastCGI using bin/service' => sub {
     requires 'Server::Starter';
-    requires 'Plack::Handler::FCGI';
-    requires 'FCGI';
-    requires 'FCGI::ProcManager';
+    requires 'Starlet';
+    requires 'Plack::Middleware::ReverseProxy';
 };

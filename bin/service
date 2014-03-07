@@ -24,13 +24,14 @@ function restart() {
     else
         echo -n "Starting server... "
         start_server \
+            --port=localhost:5001 \
             --pid-file=$pidfile \
             --status-file=$statusfile \
             -- \
-            plackup -s FCGI -E deployment \
-                --listen $var/run/server.sock \
-                --nproc 10 \
-                --proc-title seqlocator \
+            plackup -s Starlet -E deployment \
+                -e 'enable_if { $_[0]->{REMOTE_ADDR} eq "127.0.0.1" } "ReverseProxy";' \
+                --max-workers=10 \
+                --timeout=300 \
                 app.psgi \
             >>$logfile 2>&1 &
         ret=$?
