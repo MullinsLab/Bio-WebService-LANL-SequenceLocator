@@ -6,6 +6,7 @@ package HIVSequenceLocator;
 use Web::Simple;
 
 use FindBin;
+use HTTP::Request::Common;
 use JSON qw< encode_json >;
 use Plack::App::File;
 use URI;
@@ -93,10 +94,24 @@ sub dispatch_request {
     },
 }
 
+sub request {
+    my $self = shift;
+    my $req  = shift;
+    my $response = $self->agent->request($req);
+
+    if (not $response->is_success) {
+        warn sprintf "Request failed: %s %s -> %s\n",
+            $req->method, $req->uri, $response->status_line;
+        return;
+    }
+
+    return $response->decoded_content;
+}
+
 sub lanl_request {
     my ($self, $input) = @_;
-    my $response = $self->agent->post(
-        $self->lanl_endpoint,
+    return $self->request(
+        POST $self->lanl_endpoint,
         Content_Type => 'form-data',
         Content      => [
             organism            => 'HIV',
@@ -104,13 +119,6 @@ sub lanl_request {
             SEQ                 => $input,
         ],
     );
-
-    if (not $response->is_success) {
-        warn "Request failed: POST ", $self->lanl_endpoint, " -> ", $response->status_line, "\n";
-        return;
-    }
-
-    return $response->decoded_content;
 }
 
 sub lanl_parse_html {
@@ -129,15 +137,11 @@ sub lanl_parse_html {
     # For now, just return the reduced positions table.
     if ($content =~ m{"(.+/table\.txt)"}) {
         my $table_url = URI->new_abs($1, $self->lanl_base)->as_string;
-        my $response  = $self->agent->get($table_url);
-
-        if (not $response->is_success) {
-            warn "Request failed: GET $table_url -> ", $response->status_line, "\n";
-            return;
-        }
+        my $table = $self->request(GET $table_url)
+            or return;
 
         my @fields;
-        my @table = split "\n", $response->decoded_content;
+        my @table = split "\n", $table;
         for (@table) {
             my @values = split "\t";
             unless (@fields) {

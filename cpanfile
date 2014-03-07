@@ -1,4 +1,5 @@
 requires 'FindBin';
+requires 'HTTP::Request::Common';
 requires 'JSON';
 requires 'JSON::XS';
 requires 'LWP::UserAgent';
