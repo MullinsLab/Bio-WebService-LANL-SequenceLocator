@@ -55,23 +55,7 @@ sub dispatch_request {
     sub (POST + /within/hiv + %@sequence=) {
         my ($self, $sequences) = @_;
 
-#        # Submit a single sequence param as-is (assuming either a bare sequence
-#        # or user-submitted fasta).  Join multiple sequence params into fasta
-#        # automatically for a simpler API.
-#        my $seq = @$sequences == 1
-#                ? $sequences->[0]
-#                : join("\n", map { ("> sequence_$_", $sequences->[$_ - 1]) } 1 .. @$sequences);
-        
-        my $seq = join "\n", map {
-            ("> sequence_$_", $sequences->[$_ - 1])
-        } 1 .. @$sequences;
-
-        # LANL only presents the parseable table.txt we want if there's more
-        # than a single sequence...
-        $seq .= "\n> BOGUS_FAKE_HACK\n"
-            if @$sequences == 1;
-
-        my $content = $self->lanl_request($seq)
+        my $content = $self->lanl_locate($sequences)
             or return error(503 => 'Backend request to LANL failed');
 
         my $results = $self->lanl_parse_html($content)
@@ -109,15 +93,26 @@ sub request {
     return $response->decoded_content;
 }
 
-sub lanl_request {
-    my ($self, $input) = @_;
+sub lanl_locate {
+    my ($self, $sequences) = @_;
+
+    # Submit multiple sequences at once using FASTA
+    my $fasta = join "\n", map {
+        ("> sequence_$_", $sequences->[$_ - 1])
+    } 1 .. @$sequences;
+
+    # LANL only presents the parseable table.txt we want if there's more
+    # than a single sequence...
+    $fasta .= "\n> BOGUS_FAKE_HACK\n"
+        if @$sequences == 1;
+
     return $self->request(
         POST $self->lanl_endpoint,
         Content_Type => 'form-data',
         Content      => [
             organism            => 'HIV',
             DoReverseComplement => 1,
-            SEQ                 => $input,
+            SEQ                 => $fasta,
         ],
     );
 }
