@@ -2,33 +2,123 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <title>HIV Sequence Locator API</title>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
         <style type="text/css">
-            
+            code {
+                color: inherit;
+            }
         </style>
     </head>
     <body>
-        <h1>HIV Sequence Locator API</h1>
-        <p>
-            A dead-simple web API for
-            <a href="http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html">LANL's HIV sequence locator</a>
-            which returns results in JSON.  Thanks, LANL!
-        </p>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>HIV Sequence Locator API</h1>
+                <p>
+                    A dead-simple web API for
+                    <a href="http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html">LANL's HIV sequence locator</a>
+                    which returns results in JSON.  Basic region, protein, and
+                    positioning information is available.  Not all of the information
+                    presented in the human-readable HTML page is currently available
+                    through this API.  Get in touch if you'd like to see otherwise!
+                </p>
 
-        <h2>Examples</h2>
-        <p>
-            ...
-        </p>
+                <h2>Endpoint</h2>
+                <h3><code>POST .../within/hiv</code></h3>
+                <p>
+                    Requires one or more values for the POST parameter
+                    <code>sequence</code>.  Both protein and nucleotide
+                    sequences are accepted, although the data returned varies
+                    by type.  See the <a href="#curl">curl example</a>.
+                </p>
+                <p>
+                    On success (HTTP 200) the response body is a JSON array
+                    of objects, one per sequence.  Both HTTP 4xx and 5xx
+                    status codes are used on failure with plain text bodies
+                    containing an error message.
+                </p>
 
-        <p>
-            Created by Thomas Sibley of the
-            <a href="http://mullinslab.microbiol.washington.edu">Mullins Lab</a>
-            at the University of Washington, Microbiology Department.
-        </p>
+                <h2>Author</h2>
+                <p>
+                    Created by Thomas Sibley of the
+                    <a href="http://mullinslab.microbiol.washington.edu">Mullins Lab</a>
+                    at the University of Washington, Department of Microbiology.
+                </p>
+                <p>
+                    Questions? <a href="mailto:mullspt+cfar@uw.edu">Drop us a line</a>.
+                    <!--
+                    &#xB7; <a href="https://github.com/MullinsLab/hiv-locator-api">Source code</a>
+                    -->
+                </p>
+            </div>
+            <div class="col-md-6">
+                <h2>Examples</h2>
+<a name="curl"></a>
+<h3>curl</h3>
+<pre>
+curl -X POST http://indra.mullins.microbiol.washington.edu/seq-locator/within/hiv \
+     --data sequence=SLYNTVAVLYYVHQR \
+     --data sequence=TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG
+</pre>
+<pre>
+[
+   {
+      "similarity_to_hxb2" : "86.7",
+      "query" : "sequence_1",
+      "genome_start" : "",
+      "query sequence" : "SLYNTVAVLYYVHQR",
+      "genome_end" : "",
+      "end" : "91",
+      "protein" : "p17",
+      "reverse_complement" : "0",
+      "polyprotein" : "Gag",
+      "start" : "77"
+   },
+   {
+      "genome_start" : "1018",
+      "similarity_to_hxb2" : "100.0",
+      "query" : "sequence_2",
+      "query sequence" : "TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG",
+      "genome_end" : "1062",
+      "end" : "273",
+      "protein" : "p17",
+      "reverse_complement" : "0",
+      "polyprotein" : "Gag",
+      "start" : "229"
+   }
+]
+</pre>
 
-        <p>
-            <a href="mailto:mullspt+cfar@uw.edu">Contact us</a> /
-            <a href="https://github.com/MullinsLab/hiv-locator-api">Source code</a>
-        </p>
+<a name="perl"></a>
+<h3>Perl</h3>
+<pre>
+use strict;
+use warnings;
+
+use JSON qw< decode_json >;
+use LWP::UserAgent;
+
+my $agent    = LWP::UserAgent->new( agent => 'you@example.com' );
+my $response = $agent->post(
+    "http://indra.mullinslab.microbiol.washington.edu/seqlocator/within/hiv" => [
+        sequence => "TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG",
+    ],
+);
+unless ($response->is_success) {
+    die "Request failed: ", $response->status_line, "\n",
+        $response->decoded_content;
+}
+my $results = decode_json( $response->decoded_content );
+
+# $results is now an array ref, like the JSON above
+print $results->[0]{polyprotein}, "\n";
+</pre>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
