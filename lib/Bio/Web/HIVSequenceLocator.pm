@@ -141,18 +141,23 @@ sub lanl_parse {
         my $table = $self->request(GET $table_url)
             or next;
 
-        my (@fields, @these_results);
-        my @lines = split "\n", $table;
+        my (@these_results, %seen);
+        my @lines  = split "\n", $table;
+        my @fields = map {
+            s/^SeqName$/query/;         # standard key
+            s/(?<=[a-z])(?=[A-Z])/_/g;  # undo CamelCase
+            y/A-Z/a-z/;                 # normalize to lowercase
+            # Account for the same field twice in the same data table
+            if ($seen{$_}++) {
+                $_ = /^(start|end)$/
+                    ? "protein_$_"
+                    : join "_", $_, $seen{$_};
+            }
+            $_;
+        } split "\t", shift @lines;
+
         for (@lines) {
             my @values = split "\t";
-            unless (@fields) {
-                @fields = map {
-                    s/^SeqName$/query/;         # standard key
-                    s/(?<=[a-z])(?=[A-Z])/_/g;  # undo CamelCase
-                    lc;                         # normalize to lowercase
-                } @values;
-                next;
-            }
             my %data;
             @data{@fields} = @values;
 
