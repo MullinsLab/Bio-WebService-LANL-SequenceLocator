@@ -146,6 +146,7 @@ sub lanl_parse {
         my @fields = map {
             s/^SeqName$/query/;         # standard key
             s/(?<=[a-z])(?=[A-Z])/_/g;  # undo CamelCase
+            s/ +/_/g;                   # no spaces
             y/A-Z/a-z/;                 # normalize to lowercase
             # Account for the same field twice in the same data table
             if ($seen{$_}++) {
