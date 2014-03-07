@@ -8,6 +8,7 @@ use Web::Simple;
 use FindBin;
 use HTTP::Request::Common;
 use JSON qw< encode_json >;
+use List::AllUtils qw< pairwise >;
 use Plack::App::File;
 use URI;
 
@@ -125,27 +126,27 @@ sub lanl_parse_html {
     my ($self, $content) = @_;
     my @results;
 
-    # XXX TODO
-    # Eventually parse the HTML returned to pull out for each sequence:
-    #   - name (inside <h3>)
-    #   - image of hxb2 location
-    #   - CDS and full position table
-    #   - alignment to hxb2 score
-    #   - alignment to hxb2 diagram
-    #   - discriminating nucleotide vs. amino acid in LANL HTML is... annoying
+    # For now, just return the two tables which are easily parseable.
+    for my $pattern (qr{"(.+/table\.txt)"}, qr{"(.+/simple_results\.txt)"}) {
+        unless ($content =~ $pattern) {
+            warn "Couldn't find $pattern in LANL's HTML: $content\n";
+            next;
+        }
 
-    # For now, just return the reduced positions table.
-    if ($content =~ m{"(.+/table\.txt)"}) {
         my $table_url = URI->new_abs($1, $self->lanl_base)->as_string;
         my $table = $self->request(GET $table_url)
-            or return;
+            or next;
 
-        my @fields;
-        my @table = split "\n", $table;
-        for (@table) {
+        my (@fields, @these_results);
+        my @lines = split "\n", $table;
+        for (@lines) {
             my @values = split "\t";
             unless (@fields) {
-                @fields = @values;
+                @fields = map {
+                    s/^SeqName$/query/;         # standard key
+                    s/(?<=[a-z])(?=[A-Z])/_/g;  # undo CamelCase
+                    lc;                         # normalize to lowercase
+                } @values;
                 next;
             }
             my %data;
@@ -153,13 +154,16 @@ sub lanl_parse_html {
 
             next if $data{query} eq 'BOGUS_FAKE_HACK';
 
-            push @results, \%data;
+            push @these_results, \%data;
         }
-    } else {
-        warn "Couldn't find table.txt link in LANL's HTML: $content\n";
-        return;
+
+        # Merge with existing results, if any
+        @results = @results
+                 ? pairwise { +{ %$a, %$b } } @results, @these_results
+                 : @these_results;
     }
 
+    return unless @results;
     return \@results;
 }
 
