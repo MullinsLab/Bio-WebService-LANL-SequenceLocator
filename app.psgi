@@ -52,7 +52,7 @@ has lanl_endpoint => (
 );
 
 sub dispatch_request {
-    sub (POST + /locate/hiv + %@sequence=) {
+    sub (POST + /within/hiv + %@sequence=) {
         my ($self, $sequences) = @_;
 
 #        # Submit a single sequence param as-is (assuming either a bare sequence
