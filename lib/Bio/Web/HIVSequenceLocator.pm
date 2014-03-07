@@ -51,6 +51,45 @@ has lanl_endpoint => (
     builder => sub { shift->lanl_base . '/cgi-bin/LOCATE/locate.cgi' },
 );
 
+# Gathered from:
+#   http://www.hiv.lanl.gov/tmp/locate/26284.1.png
+#   http://www.hiv.lanl.gov/content/sequence/HIV/MAP/landmark.html
+#   http://www.hiv.lanl.gov/content/sequence/HIV/MAP/hxb2.xls
+#   and an existing data structure in Viroverse
+has hxb2_regions => (
+    is      => 'ro',
+    isa     => sub { die "hxb2_regions must be a HASHREF" unless ref $_[0] eq 'HASH' },
+    default => sub {
+      + {
+            'LTR5'        => [    1,  634 ],
+            'GAG'         => [  790, 2292 ],
+            'GAG-P17'     => [  790, 1186 ],
+            'GAG-P24'     => [ 1186, 1879 ],
+            'GAG-P2'      => [ 1879, 1921 ],
+            'GAG-P7'      => [ 1921, 2086 ],
+            'GAG-P1'      => [ 2086, 2134 ],
+            'GAG-P6'      => [ 2134, 2292 ],
+            'POL'         => [ 2085, 5906 ],
+            'POL-PROT'    => [ 2253, 2550 ],
+            'POL-RT'      => [ 2250, 3870 ],
+            'POL-RNASE'   => [ 3870, 4320 ],
+            'POL-INT'     => [ 4230, 5096 ],
+            'VIF'         => [ 5041, 5619 ],
+            'VPR'         => [ 5559, 5850 ],
+            'TAT-TAT1'    => [ 5831, 6045 ],
+            'REV-REV1'    => [ 5970, 6045 ],
+            'VPU'         => [ 6062, 6310 ],
+            'GP160'       => [ 6225, 8797 ],  # aka ENV
+            'GP160-GP120' => [ 6225, 7758 ],
+            'GP160-GP41'  => [ 7558, 8797 ],
+            'TAT-TAT2'    => [ 8379, 8469 ],
+            'REV-REV2'    => [ 8379, 8653 ],
+            'NEF'         => [ 8797, 9417 ],
+            'LTR3'        => [ 9086, 9719 ],
+        };
+    },
+);
+
 sub dispatch_request {
     sub (POST + /within/hiv + %@sequence~) {
         my ($self, $sequences) = @_;
@@ -171,6 +210,33 @@ sub lanl_parse {
         @results = @results
                  ? pairwise { +{ %$a, %$b } } @results, @these_results
                  : @these_results;
+    }
+
+    # Add missing fields here that we can calculate to normalize the results a
+    # little.  It's too bad LANL's results don't include these in the data
+    # files, only the HTML.
+    for my $r (@results) {
+        # Skip anything that doesn't look like an amino-acid sequence result
+        next unless $r->{query_sequence} =~ /[^ATCGU]/i;
+        next if $r->{genome_start} or $r->{genome_end};
+
+        # Expand amino acid position to nucleotide position
+        $r->{na_start} = $r->{start} * 3 - 2;
+        $r->{na_end}   = $r->{end}   * 3;
+
+        # Calculate genome position based on start of polyprotein
+        if ($r->{polyprotein} and $r->{protein}) {
+            my $region = join "-", map { uc } $r->{polyprotein}, $r->{protein};
+            if ( my $pos = $self->hxb2_regions->{$region} ) {
+                # Relative position 1 is == region start, so subtract 1 to make
+                # relative pos. zero-based.
+                $r->{"genome_$_"} = $pos->[0] + $r->{"na_$_"} - 1
+                    for qw(start end);
+            } elsif ($r->{polyprotein}) {
+                warn "BUG: Missing HXB2 coordinates for $region",
+                     " (query sequence <$r->{query_sequence}>)";
+            }
+        }
     }
 
     return unless @results;
