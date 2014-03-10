@@ -167,9 +167,48 @@ sub lanl_submit {
 
 sub lanl_parse {
     my ($self, $content) = @_;
+
+    # Fetch and parse the two tables provided as links which removes the need
+    # to parse all of the HTML.
+    my $results = $self->lanl_parse_tsv($content);
+
+    # Add missing fields here that we can calculate to normalize the results a
+    # little.  It's too bad LANL's results don't include these in the data
+    # files, only the HTML.
+    for my $r (@$results) {
+        # Skip anything that doesn't look like an amino-acid sequence result
+        next unless $r->{query_sequence} =~ /[^ATCGU]/i;
+        next if $r->{genome_start} or $r->{genome_end};
+
+        # Expand amino acid position to nucleotide position
+        $r->{na_start} = $r->{start} * 3 - 2;
+        $r->{na_end}   = $r->{end}   * 3;
+
+        # Calculate genome position based on start of polyprotein
+        if ($r->{polyprotein} and $r->{protein}) {
+            my $region = join "-", map { uc } $r->{polyprotein}, $r->{protein};
+            if ( my $pos = $self->hxb2_regions->{$region} ) {
+                # Relative position 1 is == region start, so subtract 1 to make
+                # relative pos. zero-based.
+                $r->{"genome_$_"} = $pos->[0] + $r->{"na_$_"} - 1
+                    for qw(start end);
+            } elsif ($r->{polyprotein}) {
+                warn "BUG: Missing HXB2 coordinates for $region",
+                     " (query sequence <$r->{query_sequence}>)";
+            }
+        }
+    }
+
+
+    return unless @$results;
+    return $results;
+}
+
+sub lanl_parse_tsv {
+    my ($self, $content) = @_;
     my @results;
 
-    # For now, just return the two tables which are easily parseable.
+    # XXX TODO: replace this with HTML::LinkExtor
     for my $pattern (qr{"(.+/table\.txt)"}, qr{"(.+/simple_results\.txt)"}) {
         unless ($content =~ $pattern) {
             warn "Couldn't find $pattern in LANL's HTML: $content\n";
@@ -212,35 +251,14 @@ sub lanl_parse {
                  : @these_results;
     }
 
-    # Add missing fields here that we can calculate to normalize the results a
-    # little.  It's too bad LANL's results don't include these in the data
-    # files, only the HTML.
-    for my $r (@results) {
-        # Skip anything that doesn't look like an amino-acid sequence result
-        next unless $r->{query_sequence} =~ /[^ATCGU]/i;
-        next if $r->{genome_start} or $r->{genome_end};
+    return \@results;
+}
 
-        # Expand amino acid position to nucleotide position
-        $r->{na_start} = $r->{start} * 3 - 2;
-        $r->{na_end}   = $r->{end}   * 3;
 
-        # Calculate genome position based on start of polyprotein
-        if ($r->{polyprotein} and $r->{protein}) {
-            my $region = join "-", map { uc } $r->{polyprotein}, $r->{protein};
-            if ( my $pos = $self->hxb2_regions->{$region} ) {
-                # Relative position 1 is == region start, so subtract 1 to make
-                # relative pos. zero-based.
-                $r->{"genome_$_"} = $pos->[0] + $r->{"na_$_"} - 1
-                    for qw(start end);
-            } elsif ($r->{polyprotein}) {
-                warn "BUG: Missing HXB2 coordinates for $region",
-                     " (query sequence <$r->{query_sequence}>)";
             }
         }
     }
 
-    return unless @results;
-    return \@results;
 }
 
 sub error {
