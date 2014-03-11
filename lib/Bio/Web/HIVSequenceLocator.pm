@@ -55,6 +55,11 @@ has lanl_endpoint => (
     builder => sub { shift->lanl_base . '/cgi-bin/LOCATE/locate.cgi' },
 );
 
+has _bogus_slug => (
+    is      => 'ro',
+    default => sub { 'BOGUS_SEQ_SO_TABULAR_FILES_ARE_LINKED_IN_OUTPUT' },
+);
+
 sub dispatch_request {
     sub (POST + /within/hiv + %@sequence~) {
         my ($self, $sequences) = @_;
@@ -116,7 +121,7 @@ sub lanl_submit {
 
     # LANL only presents the parseable table.txt we want if there's more
     # than a single sequence...
-    $fasta .= "\n> BOGUS_SEQ_SO_TABULAR_FILES_ARE_LINKED_IN_OUTPUT\n"
+    $fasta .= "\n> " . $self->_bogus_slug . "\n"
         if @$sequences == 1;
 
     return $self->request(
@@ -219,7 +224,7 @@ sub lanl_parse_tsv {
             my %data;
             @data{@fields} = @values;
 
-            next if $data{query} eq 'BOGUS_FAKE_HACK';
+            next if $data{query} eq $self->_bogus_slug;
 
             push @these_results, \%data;
         }
