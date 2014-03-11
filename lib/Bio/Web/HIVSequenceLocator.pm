@@ -265,8 +265,8 @@ sub lanl_parse_tables {
 
                 my %row;
                 @row{@$our_cols} =
-                    map {      $_ eq "NA" ? undef    : $_ }
-                    map { /(\d+) → (\d+)/ ? [$1, $2] : $_ }
+                    map { ($_ and $_ eq "NA")       ? undef     : $_ }
+                    map { ($_ and /(\d+) → (\d+)/)  ? [$1, $2]  : $_ }
                         @$row;
 
                 push @{$table{rows}}, \%row;
