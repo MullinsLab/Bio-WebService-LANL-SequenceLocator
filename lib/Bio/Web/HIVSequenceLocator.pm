@@ -116,7 +116,7 @@ sub lanl_submit {
 
     # LANL only presents the parseable table.txt we want if there's more
     # than a single sequence...
-    $fasta .= "\n> BOGUS_FAKE_HACK\n"
+    $fasta .= "\n> BOGUS_SEQ_SO_TABULAR_FILES_ARE_LINKED_IN_OUTPUT\n"
         if @$sequences == 1;
 
     return $self->request(
