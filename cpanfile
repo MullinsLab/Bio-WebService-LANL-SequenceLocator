@@ -1,4 +1,6 @@
 requires 'FindBin';
+requires 'HTML::LinkExtor';
+requires 'HTML::TableExtract';
 requires 'HTTP::Request::Common';
 requires 'JSON';
 requires 'JSON::XS';

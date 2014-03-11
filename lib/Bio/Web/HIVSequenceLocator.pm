@@ -1,14 +1,18 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use utf8;
+use 5.018;
 
 package Bio::Web::HIVSequenceLocator;
 use Web::Simple;
 
 use FindBin;
+use HTML::LinkExtor;
+use HTML::TableExtract;
 use HTTP::Request::Common;
 use JSON qw< encode_json >;
-use List::AllUtils qw< pairwise >;
+use List::AllUtils qw< pairwise part >;
 use Plack::App::File;
 use URI;
 
@@ -49,45 +53,6 @@ has lanl_endpoint => (
     is      => 'ro',
     lazy    => 1,
     builder => sub { shift->lanl_base . '/cgi-bin/LOCATE/locate.cgi' },
-);
-
-# Gathered from:
-#   http://www.hiv.lanl.gov/tmp/locate/26284.1.png
-#   http://www.hiv.lanl.gov/content/sequence/HIV/MAP/landmark.html
-#   http://www.hiv.lanl.gov/content/sequence/HIV/MAP/hxb2.xls
-#   and an existing data structure in Viroverse
-has hxb2_regions => (
-    is      => 'ro',
-    isa     => sub { die "hxb2_regions must be a HASHREF" unless ref $_[0] eq 'HASH' },
-    default => sub {
-      + {
-            'LTR5'        => [    1,  634 ],
-            'GAG'         => [  790, 2292 ],
-            'GAG-P17'     => [  790, 1186 ],
-            'GAG-P24'     => [ 1186, 1879 ],
-            'GAG-P2'      => [ 1879, 1921 ],
-            'GAG-P7'      => [ 1921, 2086 ],
-            'GAG-P1'      => [ 2086, 2134 ],
-            'GAG-P6'      => [ 2134, 2292 ],
-            'POL'         => [ 2085, 5906 ],
-            'POL-PROT'    => [ 2253, 2550 ],
-            'POL-RT'      => [ 2250, 3870 ],
-            'POL-RNASE'   => [ 3870, 4320 ],
-            'POL-INT'     => [ 4230, 5096 ],
-            'VIF'         => [ 5041, 5619 ],
-            'VPR'         => [ 5559, 5850 ],
-            'TAT-TAT1'    => [ 5831, 6045 ],
-            'REV-REV1'    => [ 5970, 6045 ],
-            'VPU'         => [ 6062, 6310 ],
-            'GP160'       => [ 6225, 8797 ],  # aka ENV
-            'GP160-GP120' => [ 6225, 7758 ],
-            'GP160-GP41'  => [ 7558, 8797 ],
-            'TAT-TAT2'    => [ 8379, 8469 ],
-            'REV-REV2'    => [ 8379, 8653 ],
-            'NEF'         => [ 8797, 9417 ],
-            'LTR3'        => [ 9086, 9719 ],
-        };
-    },
 );
 
 sub dispatch_request {
@@ -167,17 +132,46 @@ sub lanl_submit {
 
 sub lanl_parse {
     my ($self, $content) = @_;
-    my @results;
 
-    # For now, just return the two tables which are easily parseable.
-    for my $pattern (qr{"(.+/table\.txt)"}, qr{"(.+/simple_results\.txt)"}) {
-        unless ($content =~ $pattern) {
-            warn "Couldn't find $pattern in LANL's HTML: $content\n";
-            next;
+    # Fetch and parse the two tables provided as links which removes the need
+    # to parse all of the HTML.
+    my @results = $self->lanl_parse_tsv($content);
+
+    # Now parse the table data from the HTML
+    my @tables = $self->lanl_parse_tables($content);
+
+    @results = pairwise {
+       +{
+            %$a,
+            base_type       => $b->{base_type},
+            regions         => $b->{rows},
+            region_names    => [ map { $_->{cds} } @{$b->{rows}} ],
         }
+    } @results, @tables;
 
-        my $table_url = URI->new_abs($1, $self->lanl_base)->as_string;
-        my $table = $self->request(GET $table_url)
+    return unless @results;
+    return \@results;
+}
+
+sub lanl_parse_tsv {
+    my ($self, $content) = @_;
+    my @results;
+    my %urls;
+
+    my $extract = HTML::LinkExtor->new(
+        sub {
+            my ($tag, %attr) = @_;
+            return unless $tag eq 'a' and $attr{href};
+            return unless $attr{href} =~ m{/(table|simple_results)\.txt$};
+            $urls{$1} = $attr{href};
+        },
+        $self->lanl_base,
+    );
+    $extract->parse($content);
+
+    for my $table_name (qw(table simple_results)) {
+        next unless $urls{$table_name};
+        my $table = $self->request(GET $urls{$table_name})
             or next;
 
         my (@these_results, %seen);
@@ -212,35 +206,83 @@ sub lanl_parse {
                  : @these_results;
     }
 
-    # Add missing fields here that we can calculate to normalize the results a
-    # little.  It's too bad LANL's results don't include these in the data
-    # files, only the HTML.
-    for my $r (@results) {
-        # Skip anything that doesn't look like an amino-acid sequence result
-        next unless $r->{query_sequence} =~ /[^ATCGU]/i;
-        next if $r->{genome_start} or $r->{genome_end};
+    return @results;
+}
 
-        # Expand amino acid position to nucleotide position
-        $r->{na_start} = $r->{start} * 3 - 2;
-        $r->{na_end}   = $r->{end}   * 3;
+sub lanl_parse_tables {
+    my ($self, $content) = @_;
+    my @tables;
 
-        # Calculate genome position based on start of polyprotein
-        if ($r->{polyprotein} and $r->{protein}) {
-            my $region = join "-", map { uc } $r->{polyprotein}, $r->{protein};
-            if ( my $pos = $self->hxb2_regions->{$region} ) {
-                # Relative position 1 is == region start, so subtract 1 to make
-                # relative pos. zero-based.
-                $r->{"genome_$_"} = $pos->[0] + $r->{"na_$_"} - 1
-                    for qw(start end);
-            } elsif ($r->{polyprotein}) {
-                warn "BUG: Missing HXB2 coordinates for $region",
-                     " (query sequence <$r->{query_sequence}>)";
+    my %columns_for = (
+        'amino acid'    => [
+            "CDS"                                               => "cds",
+            "AA position relative to protein start in HXB2"     => "aa_from_protein_start",
+            "AA position relative to query sequence start"      => "aa_from_query_start",
+            "AA position relative to polyprotein start in HXB2" => "aa_from_polyprotein_start",
+            "NA position relative to CDS start in HXB2"         => "aa_from_cds_start",
+            "NA position relative to HXB2 genome start"         => "na_from_hxb2_start",
+        ],
+        'nucleotide'    => [
+            "CDS"                                                   => "cds",
+            "Nucleotide position relative to CDS start in HXB2"     => "na_from_cds_start",
+            "Nucleotide position relative to query sequence start"  => "na_from_query_start",
+            "Nucleotide position relative to HXB2 genome start"     => "na_from_hxb2_start",
+            "Amino Acid position relative to protein start in HXB2" => "aa_from_protein_start",
+        ],
+    );
+
+    for my $base_type (sort keys %columns_for) {
+        my ($their_cols, $our_cols) = part {
+            state $i = 0;
+            $i++ % 2
+        } @{ $columns_for{$base_type} };
+
+        my $extract = HTML::TableExtract->new( headers => $their_cols );
+        $extract->parse($content);
+
+        # Examine all matching tables
+        for my $table ($extract->tables) {
+            my %table = (
+                coords      => [$table->coords],
+                base_type   => $base_type,
+                columns     => $our_cols,
+                rows        => [],
+            );
+            for my $row ($table->rows) {
+                @$row = map { defined $_ ? s/^\s+|\s*$//gr : $_ } @$row;
+
+                # An empty row with only a sequence string in the first column.
+                if (    $row->[0]
+                    and $row->[0] =~ /^[A-Za-z]+$/
+                    and not grep { defined and length } @$row[1 .. scalar @$row - 1])
+                {
+                    $table{rows}->[-1]{protein_translation} = $row->[0];
+                    next;
+                }
+
+                # Not all rows are data, some are informational sentences.
+                next if grep { not defined } @$row;
+
+                my %row;
+                @row{@$our_cols} =
+                    map { ($_ and $_ eq "NA")       ? undef     : $_ }
+                    map { ($_ and /(\d+) → (\d+)/)  ? [$1, $2]  : $_ }
+                        @$row;
+
+                push @{$table{rows}}, \%row;
             }
+            push @tables, \%table
+                if @{$table{rows}};
         }
     }
 
-    return unless @results;
-    return \@results;
+    # Sort by depth, then within each depth by count
+    @tables = sort {
+        $a->{coords}[0] <=> $b->{coords}[0]
+     or $a->{coords}[1] <=> $b->{coords}[1]
+    } @tables;
+
+    return @tables;
 }
 
 sub error {
