@@ -1,4 +1,5 @@
 requires 'FindBin';
+requires 'HTML::TableExtract';
 requires 'HTTP::Request::Common';
 requires 'JSON';
 requires 'JSON::XS';
