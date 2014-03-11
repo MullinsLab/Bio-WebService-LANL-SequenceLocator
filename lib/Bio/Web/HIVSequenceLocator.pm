@@ -143,12 +143,14 @@ sub lanl_parse {
     return unless @results and @tables;
 
     @results = pairwise {
-       +{
+        my $new = {
             %$a,
             base_type       => $b->{base_type},
             regions         => $b->{rows},
             region_names    => [ map { $_->{cds} } @{$b->{rows}} ],
-        }
+        };
+        delete $new->{$_} for qw(protein protein_start protein_end);
+        $new;
     } @results, @tables;
 
     return \@results;
