@@ -140,6 +140,8 @@ sub lanl_parse {
     # Now parse the table data from the HTML
     my @tables = $self->lanl_parse_tables($content);
 
+    return unless @results and @tables;
+
     @results = pairwise {
        +{
             %$a,
@@ -149,7 +151,6 @@ sub lanl_parse {
         }
     } @results, @tables;
 
-    return unless @results;
     return \@results;
 }
 
