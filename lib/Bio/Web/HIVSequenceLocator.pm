@@ -124,7 +124,7 @@ sub lanl_submit {
         Content_Type => 'form-data',
         Content      => [
             organism            => 'HIV',
-            DoReverseComplement => 1,
+            DoReverseComplement => 0,
             SEQ                 => $fasta,
         ],
     );
