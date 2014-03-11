@@ -8,6 +8,7 @@ package Bio::Web::HIVSequenceLocator;
 use Web::Simple;
 
 use FindBin;
+use HTML::LinkExtor;
 use HTML::TableExtract;
 use HTTP::Request::Common;
 use JSON qw< encode_json >;
@@ -153,16 +154,22 @@ sub lanl_parse {
 sub lanl_parse_tsv {
     my ($self, $content) = @_;
     my @results;
+    my %urls;
 
-    # XXX TODO: replace this with HTML::LinkExtor
-    for my $pattern (qr{"(.+/table\.txt)"}, qr{"(.+/simple_results\.txt)"}) {
-        unless ($content =~ $pattern) {
-            warn "Couldn't find $pattern in LANL's HTML: $content\n";
-            next;
-        }
+    my $extract = HTML::LinkExtor->new(
+        sub {
+            my ($tag, %attr) = @_;
+            return unless $tag eq 'a' and $attr{href};
+            return unless $attr{href} =~ m{/(table|simple_results)\.txt$};
+            $urls{$1} = $attr{href};
+        },
+        $self->lanl_base,
+    );
+    $extract->parse($content);
 
-        my $table_url = URI->new_abs($1, $self->lanl_base)->as_string;
-        my $table = $self->request(GET $table_url)
+    for my $table_name (qw(table simple_results)) {
+        next unless $urls{$table_name};
+        my $table = $self->request(GET $urls{$table_name})
             or next;
 
         my (@these_results, %seen);
