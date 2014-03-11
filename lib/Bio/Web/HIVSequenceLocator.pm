@@ -271,7 +271,8 @@ sub lanl_parse_tables {
 
                 push @{$table{rows}}, \%row;
             }
-            push @tables, \%table;
+            push @tables, \%table
+                if @{$table{rows}};
         }
     }
 
