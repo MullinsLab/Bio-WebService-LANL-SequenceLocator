@@ -141,10 +141,12 @@ sub lanl_parse {
     my @tables = $self->lanl_parse_tables($content);
 
     @results = pairwise {
-        $a->{base_type}     = delete $b->{base_type};
-        $a->{regions}       = $b->{rows};
-        $a->{region_names}  = [ map { $_->{cds} } @{$a->{regions}} ];
-        $a
+       +{
+            %$a,
+            base_type       => $b->{base_type},
+            regions         => $b->{rows},
+            region_names    => [ map { $_->{cds} } @{$b->{rows}} ],
+        }
     } @results, @tables;
 
     return unless @results;
