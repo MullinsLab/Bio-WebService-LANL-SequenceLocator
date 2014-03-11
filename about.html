@@ -66,31 +66,129 @@ curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/withi
      --data sequence=SLYNTVAVLYYVHQR \
      --data sequence=TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG
 </pre>
-<pre>
+<pre class="pre-scrollable">
 [
    {
-      "similarity_to_hxb2" : "86.7",
       "query" : "sequence_1",
-      "genome_start" : "",
-      "query sequence" : "SLYNTVAVLYYVHQR",
-      "genome_end" : "",
-      "end" : "91",
-      "protein" : "p17",
+      "query_sequence" : "SLYNTVAVLYYVHQR",
+      "base_type" : "amino acid",
       "reverse_complement" : "0",
-      "polyprotein" : "Gag",
+      "similarity_to_hxb2" : "86.7",
       "start" : "77"
+      "end" : "91",
+      "genome_end" : "",
+      "genome_start" : "",
+      "polyprotein" : "Gag",
+      "protein" : "p17",
+      "protein_start" : "77",
+      "protein_end" : "91",
+      "region_names" : [
+         "Gag",
+         "p17"
+      ],
+      "regions" : [
+         {
+            "aa_from_cds_start" : [
+               "229",
+               "273"
+            ],
+            "aa_from_polyprotein_start" : null,
+            "aa_from_protein_start" : [
+               "77",
+               "91"
+            ],
+            "aa_from_query_start" : [
+               "1",
+               "15"
+            ],
+            "cds" : "Gag",
+            "na_from_hxb2_start" : [
+               "1018",
+               "1062"
+            ]
+         },
+         {
+            "aa_from_cds_start" : [
+               "229",
+               "273"
+            ],
+            "aa_from_polyprotein_start" : null,
+            "aa_from_protein_start" : [
+               "77",
+               "91"
+            ],
+            "aa_from_query_start" : [
+               "1",
+               "15"
+            ],
+            "cds" : "p17",
+            "na_from_hxb2_start" : [
+               "1018",
+               "1062"
+            ]
+         }
+      ],
    },
    {
-      "genome_start" : "1018",
-      "similarity_to_hxb2" : "100.0",
       "query" : "sequence_2",
-      "query sequence" : "TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG",
-      "genome_end" : "1062",
-      "end" : "273",
-      "protein" : "p17",
+      "query_sequence" : "TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG",
+      "base_type" : "nucleotide",
       "reverse_complement" : "0",
-      "polyprotein" : "Gag",
+      "similarity_to_hxb2" : "100.0",
       "start" : "229"
+      "end" : "273",
+      "genome_start" : "1018",
+      "genome_end" : "1062",
+      "polyprotein" : "Gag",
+      "protein" : "p17",
+      "protein_end" : "273",
+      "protein_start" : "229",
+      "region_names" : [
+         "Gag",
+         "p17"
+      ],
+      "regions" : [
+         {
+            "aa_from_protein_start" : [
+               "77",
+               "91"
+            ],
+            "cds" : "Gag",
+            "na_from_cds_start" : [
+               "229",
+               "273"
+            ],
+            "na_from_hxb2_start" : [
+               "1018",
+               "1062"
+            ],
+            "na_from_query_start" : [
+               "1",
+               "45"
+            ],
+            "protein_translation" : "SLYNTVATLYCVHQR"
+         },
+         {
+            "aa_from_protein_start" : [
+               "77",
+               "91"
+            ],
+            "cds" : "p17",
+            "na_from_cds_start" : [
+               "229",
+               "273"
+            ],
+            "na_from_hxb2_start" : [
+               "1018",
+               "1062"
+            ],
+            "na_from_query_start" : [
+               "1",
+               "45"
+            ],
+            "protein_translation" : "SLYNTVATLYCVHQR"
+         }
+      ],
    }
 ]
 </pre>
