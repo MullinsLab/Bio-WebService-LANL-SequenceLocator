@@ -12,7 +12,7 @@ use HTML::LinkExtor;
 use HTML::TableExtract;
 use HTTP::Request::Common;
 use JSON qw< encode_json >;
-use List::AllUtils qw< pairwise part >;
+use List::AllUtils qw< pairwise part min max >;
 use Plack::App::File;
 use URI;
 
@@ -152,6 +152,27 @@ sub lanl_parse {
         delete $new->{$_} for qw(protein protein_start protein_end);
         $new;
     } @results, @tables;
+
+    # Fill in genome start/end for amino acid sequences
+    for my $r (@results) {
+        next unless $r->{base_type} eq 'amino acid';
+
+        if ($r->{genome_start} or $r->{genome_end}) {
+            warn "Amino acid sequence with genome start/end already?!",
+                 " query <$r->{query_sequence}>";
+            next;
+        }
+
+        $r->{genome_start} = min map { $_->{na_from_hxb2_start}[0] } @{$r->{regions}};
+        $r->{genome_end}   = max map { $_->{na_from_hxb2_start}[1] } @{$r->{regions}};
+
+        my $genome_length = $r->{genome_end} - $r->{genome_start} + 1;
+        if ((length($r->{query_sequence}) * 3) != $genome_length) {
+            warn "Detected bad genome start/end ($r->{genome_end} - $r->{genome_start} = $genome_length)",
+                 " for query <$r->{query_sequence}>?  Query length (in NA) is ",
+                 length($r->{query_sequence}) * 3;
+        }
+    }
 
     return \@results;
 }
