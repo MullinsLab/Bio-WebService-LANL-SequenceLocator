@@ -251,9 +251,7 @@ sub lanl_parse_tables {
             for my $row ($table->rows) {
                 @$row = map { defined $_ ? s/^\s+|\s*$//gr : $_ } @$row;
 
-                # An empty row with only a sequence string as the first column
-                # value.  Sometimes these rows are informational and contain
-                # sentences.
+                # An empty row with only a sequence string in the first column.
                 if (    $row->[0]
                     and $row->[0] =~ /^[A-Za-z]+$/
                     and not grep { defined and length } @$row[1 .. scalar @$row - 1])
@@ -261,6 +259,9 @@ sub lanl_parse_tables {
                     $table{rows}->[-1]{protein_translation} = $row->[0];
                     next;
                 }
+
+                # Not all rows are data, some are informational sentences.
+                next if grep { not defined } @$row;
 
                 my %row;
                 @row{@$our_cols} =
