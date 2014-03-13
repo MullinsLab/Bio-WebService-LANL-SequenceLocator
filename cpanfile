@@ -1,17 +1,19 @@
-requires 'FindBin';
 requires 'HTML::LinkExtor';
 requires 'HTML::TableExtract';
 requires 'HTTP::Request::Common';
-requires 'JSON';
-requires 'JSON::XS';
-requires 'List::AllUtils';
 requires 'LWP::UserAgent';
-requires 'Plack::App::File';
-requires 'URI';
-requires 'Web::Simple';
+requires 'List::AllUtils';
+requires 'Moo';
+requires 'namespace::autoclean';
+requires 'strictures';
 
-feature 'deployment', 'Quick deployment with Server::Starter + FastCGI using bin/service' => sub {
+feature 'server', 'Web API server' => sub {
+    requires 'FindBin';
+    requires 'JSON';
+    requires 'JSON::XS';
+    requires 'Plack::App::File';
+    requires 'Plack::Middleware::ReverseProxy';
     requires 'Server::Starter';
     requires 'Starlet';
-    requires 'Plack::Middleware::ReverseProxy';
+    requires 'Web::Simple';
 };

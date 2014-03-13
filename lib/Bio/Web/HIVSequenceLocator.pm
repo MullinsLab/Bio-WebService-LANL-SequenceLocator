@@ -1,20 +1,15 @@
-#!/usr/bin/env perl
-use strict;
-use warnings;
+use strictures 1;
 use utf8;
 use 5.018;
 
 package Bio::Web::HIVSequenceLocator;
-use Web::Simple;
 
-use FindBin;
+use Moo;
 use HTML::LinkExtor;
 use HTML::TableExtract;
 use HTTP::Request::Common;
-use JSON qw< encode_json >;
 use List::AllUtils qw< pairwise part min max >;
-use Plack::App::File;
-use URI;
+use namespace::autoclean;
 
 our $VERSION = 20140306;
 
@@ -38,12 +33,6 @@ has agent => (
     },
 );
 
-has about_page => (
-    is      => 'ro',
-    lazy    => 1,
-    builder => sub { "$FindBin::Bin/about.html" },
-);
-
 has lanl_base => (
     is      => 'ro',
     lazy    => 1,
@@ -60,34 +49,6 @@ has _bogus_slug => (
     is      => 'ro',
     default => sub { 'BOGUS_SEQ_SO_TABULAR_FILES_ARE_LINKED_IN_OUTPUT' },
 );
-
-sub dispatch_request {
-    sub (POST + /within/hiv + %@sequence~) {
-        my ($self, $sequences) = @_;
-
-        return error(422 => 'At least one value for "sequence" is needed.')
-            unless $sequences and @$sequences;
-
-        my $results = $self->lanl_locate($sequences)
-            or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
-
-        my $json = eval { encode_json($results) };
-        if ($@ or not $json) {
-            warn $@ ? "Error encoding JSON response: $@\n"
-                    : "Failed to encode JSON response, but no error?!\n";
-            return error(500 => "Error encoding results to JSON.  Contact @{[ $self->contact ]}");
-        }
-
-        return [
-            200,
-            [ 'Content-type' => 'application/json' ],
-            [ $json, "\n" ],
-        ];
-    },
-    sub (GET + /) {
-        Plack::App::File->new(file => $_[0]->about_page);
-    },
-}
 
 sub _request {
     my $self = shift;
@@ -315,12 +276,4 @@ sub lanl_parse_tables {
     return @tables;
 }
 
-sub error {
-    return [
-        shift,
-        [ 'Content-type' => 'text/plain' ],
-        [ join " ", @_ ]
-    ];
-}
-
-__PACKAGE__->run_if_script;
+42;
