@@ -14,7 +14,7 @@ use namespace::autoclean;
 
 has contact => (
     is      => 'ro',
-    default => sub { $ENV{SERVER_ADMIN} || 'mullspt+cfar@uw.edu' },
+    default => sub { $ENV{SERVER_ADMIN} || '[no address provided]' },
 );
 
 has locator => (
