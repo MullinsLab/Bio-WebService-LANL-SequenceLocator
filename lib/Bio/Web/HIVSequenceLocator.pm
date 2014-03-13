@@ -89,7 +89,7 @@ sub dispatch_request {
     },
 }
 
-sub request {
+sub _request {
     my $self = shift;
     my $req  = shift;
     my $response = $self->agent->request($req);
@@ -125,7 +125,7 @@ sub lanl_submit {
     $fasta .= "\n> " . $self->_bogus_slug . "\n"
         if @$sequences == 1;
 
-    return $self->request(
+    return $self->_request(
         POST $self->lanl_endpoint,
         Content_Type => 'form-data',
         Content      => [
@@ -201,7 +201,7 @@ sub lanl_parse_tsv {
 
     for my $table_name (qw(table simple_results)) {
         next unless $urls{$table_name};
-        my $table = $self->request(GET $urls{$table_name})
+        my $table = $self->_request(GET $urls{$table_name})
             or next;
 
         my (@these_results, %seen);
