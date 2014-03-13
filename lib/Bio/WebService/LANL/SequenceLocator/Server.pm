@@ -44,7 +44,7 @@ sub dispatch_request {
         return error(422 => 'At least one value for "sequence" is needed.')
             unless $sequences and @$sequences;
 
-        my $results = $self->locator->lanl_locate($sequences)
+        my $results = $self->locator->find($sequences)
             or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
 
         my $json = eval { encode_json($results) };

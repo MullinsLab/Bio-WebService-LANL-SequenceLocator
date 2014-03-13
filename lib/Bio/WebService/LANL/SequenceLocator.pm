@@ -64,16 +64,16 @@ sub _request {
     return $response->decoded_content;
 }
 
-sub lanl_locate {
+sub find {
     my ($self, $sequences) = @_;
 
-    my $content = $self->lanl_submit($sequences)
+    my $content = $self->submit_sequences($sequences)
         or return;
 
-    return $self->lanl_parse($content);
+    return $self->parse_html($content);
 }
 
-sub lanl_submit {
+sub submit_sequences {
     my ($self, $sequences) = @_;
 
     # Submit multiple sequences at once using FASTA
@@ -97,15 +97,15 @@ sub lanl_submit {
     );
 }
 
-sub lanl_parse {
+sub parse_html {
     my ($self, $content) = @_;
 
     # Fetch and parse the two tables provided as links which removes the need
     # to parse all of the HTML.
-    my @results = $self->lanl_parse_tsv($content);
+    my @results = $self->parse_tsv($content);
 
     # Now parse the table data from the HTML
-    my @tables = $self->lanl_parse_tables($content);
+    my @tables = $self->parse_tables($content);
 
     return unless @results and @tables;
 
@@ -144,7 +144,7 @@ sub lanl_parse {
     return \@results;
 }
 
-sub lanl_parse_tsv {
+sub parse_tsv {
     my ($self, $content) = @_;
     my @results;
     my %urls;
@@ -200,7 +200,7 @@ sub lanl_parse_tsv {
     return @results;
 }
 
-sub lanl_parse_tables {
+sub parse_tables {
     my ($self, $content) = @_;
     my @tables;
 
