@@ -1,1 +1,1 @@
-lib/Bio/Web/HIVSequenceLocator.pm
+lib/Bio/WebService/LANL/SequenceLocator/Server.pm

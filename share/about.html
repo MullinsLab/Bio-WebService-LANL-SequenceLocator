@@ -21,10 +21,11 @@
                 <p>
                     A dead-simple web API for
                     <a href="http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html">LANL's HIV sequence locator</a>
-                    which returns results in JSON.  Basic region, protein, and
-                    positioning information is available.  Not all of the information
-                    presented in the human-readable HTML page is currently available
-                    through this API.  Get in touch if you'd like to see otherwise!
+                    providing results in JSON.  Positioning, region, and
+                    protein information is all available.  Most of the data
+                    presented in the human-readable HTML page is extracted via
+                    this API.  Get in touch if you need something that's
+                    missing!
                 </p>
 
                 <h2>Endpoint</h2>
@@ -189,7 +190,30 @@ curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/withi
 
 <a name="perl"></a>
 <h3>Perl</h3>
+<h4>Directly using <code>Bio::WebService::LANL::SequenceLocator</code></h4>
 <pre>
+#!/usr/bin/env perl
+#
+# First install the library:
+#   cpan -i Bio::WebService::LANL::SequenceLocator
+# 
+use strict;
+use warnings;
+use Bio::WebService::LANL::SequenceLocator;
+
+my $locator = Bio::WebService::LANL::SequenceLocator->new(
+    agent_string => 'Your Organization - you@example.com',
+);
+
+my @sequences = $locator->find([
+    "agcaatcagatggtcagccaaaattgccctatagtgcagaacatcc"
+   ."aggggcaagtggtacatcaggccatatcacctagaactttaaatgca",
+]);
+</pre>
+
+<h4>Through our web API</h4>
+<pre>
+#!/usr/bin/env perl
 use strict;
 use warnings;
 
@@ -210,6 +234,37 @@ my $results = decode_json( $response->decoded_content );
 
 # $results is now an array ref, like the JSON above
 print $results->[0]{polyprotein}, "\n";
+</pre>
+
+<a name="python"></a>
+<h3>Python</h3>
+<pre>
+#!/usr/bin/env python2
+from urllib2 import Request, urlopen, URLError
+from urllib  import urlencode
+import json
+
+request = Request('http://indra.microbiol.washington.edu/locate-sequence/within/hiv')
+data = urlencode({
+    'sequence': [
+        'SLYNTVAVLYYVHQR',
+        'TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG'
+    ]
+}, True);
+
+try:
+    response = urlopen(request, data)
+    text     = response.read()
+    results  = json.loads(text)
+except URLError, e:
+    print 'Request failed: ', e
+except ValueError, e:
+    print 'Decoding JSON failed: ', e
+finally:
+    if results == None:
+        exit(1)
+
+print results
 </pre>
                 </div>
             </div>
