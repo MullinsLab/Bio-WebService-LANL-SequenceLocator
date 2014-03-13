@@ -18,9 +18,10 @@ use URI;
 
 our $VERSION = 20140306;
 
-has contact => (
+has agent_string => (
     is      => 'ro',
-    default => sub { 'mullspt+cfar@uw.edu' },
+    lazy    => 1,
+    builder => sub { '' },
 );
 
 has agent => (
@@ -30,7 +31,7 @@ has agent => (
         require LWP::UserAgent;
         my $self  = shift;
         my $agent = LWP::UserAgent->new(
-            agent => join(" ", __PACKAGE__ . "/$VERSION", $self->contact),
+            agent => join(" ", __PACKAGE__ . "/$VERSION", $self->agent_string),
         );
         $agent->env_proxy;
         return $agent;
