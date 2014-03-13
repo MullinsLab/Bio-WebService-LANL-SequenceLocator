@@ -56,6 +56,9 @@ sub dispatch_request {
             [ $json, "\n" ],
         ];
     },
+    sub (GET + /within/hiv) {
+        error( 405 => "You must make location requests using POST." )
+    },
     sub (GET + /) {
         state $about = Plack::App::File->new(file => $_[0]->about_page);
         $about;
