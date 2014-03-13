@@ -57,7 +57,8 @@ sub dispatch_request {
         ];
     },
     sub (GET + /) {
-        Plack::App::File->new(file => $_[0]->about_page);
+        state $about = Plack::App::File->new(file => $_[0]->about_page);
+        $about;
     },
 }
 
