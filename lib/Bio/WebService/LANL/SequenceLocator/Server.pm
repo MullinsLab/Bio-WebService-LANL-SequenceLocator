@@ -3,10 +3,10 @@ use strictures 1;
 use utf8;
 use 5.018;
 
-package Bio::Web::HIVSequenceLocator::Server;
+package Bio::WebService::LANL::SequenceLocator::Server;
 use Web::Simple;
 
-use Bio::Web::HIVSequenceLocator;
+use Bio::WebService::LANL::SequenceLocator;
 use FindBin;
 use JSON qw< encode_json >;
 use Plack::App::File;
@@ -20,11 +20,11 @@ has contact => (
 has locator => (
     is      => 'ro',
     isa     => sub {
-        die "Attribute 'locator' is not a Bio::Web::HIVSequenceLocator"
-            unless $_[0]->isa("Bio::Web::HIVSequenceLocator");
+        die "Attribute 'locator' is not a Bio::WebService::LANL::SequenceLocator"
+            unless $_[0]->isa("Bio::WebService::LANL::SequenceLocator");
     },
     lazy    => 1,
-    builder => sub { Bio::Web::HIVSequenceLocator->new( agent_string => $_[0]->contact ) },
+    builder => sub { Bio::WebService::LANL::SequenceLocator->new( agent_string => $_[0]->contact ) },
 );
 
 has about_page => (

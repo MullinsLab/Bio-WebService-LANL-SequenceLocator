@@ -2,7 +2,7 @@ use strictures 1;
 use utf8;
 use 5.018;
 
-package Bio::Web::HIVSequenceLocator;
+package Bio::WebService::LANL::SequenceLocator;
 
 use Moo;
 use HTML::LinkExtor;
