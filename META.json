@@ -29,7 +29,7 @@
          "prereqs" : {
             "runtime" : {
                "requires" : {
-                  "FindBin" : "0",
+                  "File::Share" : "0",
                   "JSON" : "0",
                   "JSON::XS" : "0",
                   "Plack::App::File" : "0",
@@ -45,7 +45,8 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "6.30"
+            "ExtUtils::MakeMaker" : "6.30",
+            "File::ShareDir::Install" : "0.03"
          }
       },
       "develop" : {

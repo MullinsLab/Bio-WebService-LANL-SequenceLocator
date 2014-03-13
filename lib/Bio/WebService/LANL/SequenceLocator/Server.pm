@@ -42,7 +42,7 @@ package Bio::WebService::LANL::SequenceLocator::Server;
 use Web::Simple;
 
 use Bio::WebService::LANL::SequenceLocator;
-use FindBin;
+use File::Share qw< dist_file >;
 use JSON qw< encode_json >;
 use Plack::App::File;
 use namespace::autoclean;
@@ -69,7 +69,7 @@ has locator => (
 has about_page => (
     is      => 'ro',
     lazy    => 1,
-    builder => sub { "$FindBin::Bin/about.html" },
+    builder => sub { dist_file('Bio-WebService-LANL-SequenceLocator', 'about.html') },
 );
 
 sub dispatch_request {

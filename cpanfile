@@ -10,7 +10,7 @@ requires 'namespace::autoclean';
 requires 'strictures';
 
 feature 'server', 'Web API server' => sub {
-    requires 'FindBin';
+    requires 'File::Share';
     requires 'JSON';
     requires 'JSON::XS';
     requires 'Plack::App::File';
