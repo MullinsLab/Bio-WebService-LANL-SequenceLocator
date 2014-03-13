@@ -24,7 +24,11 @@ has locator => (
             unless $_[0]->isa("Bio::WebService::LANL::SequenceLocator");
     },
     lazy    => 1,
-    builder => sub { Bio::WebService::LANL::SequenceLocator->new( agent_string => $_[0]->contact ) },
+    builder => sub {
+        Bio::WebService::LANL::SequenceLocator->new(
+            agent_string => join " ", "via", __PACKAGE__, $_[0]->contact
+        )
+    },
 );
 
 has about_page => (
