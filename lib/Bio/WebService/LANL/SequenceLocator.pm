@@ -141,7 +141,7 @@ sub parse_html {
         }
     }
 
-    return \@results;
+    return wantarray ? @results : \@results;
 }
 
 sub parse_tsv {
