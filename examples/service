@@ -32,6 +32,7 @@ function restart() {
                 -e 'enable_if { $_[0]->{REMOTE_ADDR} eq "127.0.0.1" } "ReverseProxy";' \
                 --max-workers=10 \
                 --timeout=300 \
+                -I lib \
                 app.psgi \
             >>$logfile 2>&1 &
         ret=$?
