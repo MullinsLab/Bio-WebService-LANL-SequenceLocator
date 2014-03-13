@@ -3,6 +3,41 @@ use strictures 1;
 use utf8;
 use 5.018;
 
+=head1 NAME
+
+Bio::WebService::LANL::SequenceLocator::Server - A JSON web API for LANL's HIV sequence locator
+
+=head1 SYNOPSIS
+
+After installation:
+
+    plackup `perldoc -l Bio::WebService::LANL::SequenceLocator::Server`
+
+Or from a git checkout or tarball:
+
+    plackup     # uses app.psgi
+
+Or as a L<Server::Starter> managed service:
+
+    examples/service start
+
+=head1 DESCRIPTION
+
+This server powers
+L<a simple, JSON-based web API|http://indra.mullins.microbiol.washington.edu/locate-sequence/>
+for the L<LANL's HIV sequence locator|http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html>
+using L<Bio::WebService::LANL::SequenceLocator>.
+
+=head1 ENVIRONMENT
+
+=head2 SERVER_ADMIN
+
+Set the SERVER_ADMIN environment variable before starting the server to provide
+a contact address in requests to LANL and server error messages in API
+responses.
+
+=cut
+
 package Bio::WebService::LANL::SequenceLocator::Server;
 use Web::Simple;
 
@@ -78,3 +113,18 @@ sub error {
 }
 
 __PACKAGE__->run_if_script;
+
+=head1 AUTHOR
+
+Thomas Sibley E<lt>trsibley@uw.eduE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2014 by the Mullins Lab, Department of Microbiology, University of
+Washington.
+
+=head1 LICENSE
+
+Licensed under the same terms as Perl 5 itself.
+
+=cut

@@ -2,6 +2,94 @@ use strictures 1;
 use utf8;
 use 5.018;
 
+=head1 NAME
+
+Bio::WebService::LANL::SequenceLocator - Locate sequences within HIV using LANL's web tool
+
+=head1 SYNOPSIS
+
+    use Bio::WebService::LANL::SequenceLocator;
+    
+    my $locator = Bio::WebService::LANL::SequenceLocator->new(
+        agent_string => 'Your Organization - you@example.com',
+    );
+    my @sequences = $locator->find([
+        "agcaatcagatggtcagccaaaattgccctatagtgcagaacatccaggggcaagtggtacatcaggccatatcacctagaactttaaatgca",
+    ]);
+
+See L</EXAMPLE RESULTS> below.
+
+=head1 DESCRIPTION
+
+This library provides simple programmatic access to
+L<LANL's HIV sequence locator|http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html>
+web tool and is also used to power
+L<a simple, JSON-based web API|http://indra.mullins.microbiol.washington.edu/locate-sequence/>
+for the same tool (via L<Bio::WebService::LANL::SequenceLocator::Server>).
+
+Nearly all of the information output by LANL's sequence locator is parsed and
+provided by this library, though the results do vary slightly depending on the
+base type of the query sequence.  Multiple query sequences can be located at
+the same time and results will be returned for all.
+
+Results are extracted from both tab-delimited files provided by LANL as well as
+the HTML itself.
+
+=head1 EXAMPLE RESULTS
+
+    # Using @sequences from the SYNOPSIS above
+    use JSON;
+    print encode_json(\@sequences);
+    
+    __END__
+    [
+       {
+          "query" : "sequence_1",
+          "query_sequence" : "AGCAATCAGATGGTCAGCCAAAATTGCCCTATAGTGCAGAACATCCAGGG GCAAGTGGTACATCAGGCCATATCACCTAGAACTTTAAATGCA",
+          "base_type" : "nucleotide",
+          "reverse_complement" : "0",
+          "similarity_to_hxb2" : "94.6",
+          "start" : "373"
+          "end" : "462",
+          "genome_start" : "1162",
+          "genome_end" : "1251",
+          "polyprotein" : "Gag",
+          "region_names" : [
+             "Gag",
+             "p17",
+             "p24"
+          ],
+          "regions" : [
+             {
+                "cds" : "Gag",
+                "aa_from_protein_start" : [ "125", "154" ],
+                "na_from_cds_start" : [ "373", "462" ],
+                "na_from_hxb2_start" : [ "1162", "1251" ],
+                "na_from_query_start" : [ "1", "93" ],
+                "protein_translation" : "SNQMVSQNCPIVQNIQGQVVHQAISPRTLNA"
+             },
+             {
+                "cds" : "p17",
+                "aa_from_protein_start" : [ "125", "132" ],
+                "na_from_cds_start" : [ "373", "396" ],
+                "na_from_hxb2_start" : [ "1162", "1185" ],
+                "na_from_query_start" : [ "1", "27" ],
+                "protein_translation" : "SNQMVSQNC"
+             },
+             {
+                "cds" : "p24",
+                "aa_from_protein_start" : [ "1", "22" ],
+                "na_from_cds_start" : [ "1", "66" ],
+                "na_from_hxb2_start" : [ "1186", "1251" ],
+                "na_from_query_start" : [ "28", "93" ],
+                "protein_translation" : "PIVQNIQGQVVHQAISPRTLNA"
+             }
+          ],
+       }
+    ]
+
+=cut
+
 package Bio::WebService::LANL::SequenceLocator;
 
 use Moo;
@@ -12,6 +100,16 @@ use List::AllUtils qw< pairwise part min max >;
 use namespace::autoclean;
 
 our $VERSION = 20140306;
+
+=head1 METHODS
+
+=head2 new
+
+Returns a new instance of this class.  An optional parameter C<agent_string>
+should be provided to identify yourself to LANL out of politeness.  See the
+L</SYNOPSIS> for an example.
+
+=cut
 
 has agent_string => (
     is      => 'ro',
@@ -63,6 +161,18 @@ sub _request {
 
     return $response->decoded_content;
 }
+
+=head2 find
+
+Takes an array ref of sequence strings.  Sequences may be in amino acids or
+nucleotides and mixed freely.  Sequences should not be in FASTA format.
+
+Returns a list of hashrefs when called in list context, otherwise returns an
+arrayref of hashrefs.
+
+See L</EXAMPLE RESULTS> for the structure of the data returned.
+
+=cut
 
 sub find {
     my ($self, $sequences) = @_;
@@ -275,5 +385,20 @@ sub parse_tables {
 
     return @tables;
 }
+
+=head1 AUTHOR
+
+Thomas Sibley E<lt>trsibley@uw.eduE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2014 by the Mullins Lab, Department of Microbiology, University of
+Washington.
+
+=head1 LICENSE
+
+Licensed under the same terms as Perl 5 itself.
+
+=cut
 
 42;
