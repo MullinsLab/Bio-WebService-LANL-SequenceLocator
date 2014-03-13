@@ -1,3 +1,5 @@
+requires 'perl', '5.018';
+
 requires 'HTML::LinkExtor';
 requires 'HTML::TableExtract';
 requires 'HTTP::Request::Common';
@@ -16,4 +18,8 @@ feature 'server', 'Web API server' => sub {
     requires 'Server::Starter';
     requires 'Starlet';
     requires 'Web::Simple';
+};
+
+on test => sub {
+    requires 'Test::More', '0.88';
 };

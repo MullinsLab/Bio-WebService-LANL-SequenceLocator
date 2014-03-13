@@ -1,1 +1,8 @@
 /var
+/Bio-WebService-LANL-SequenceLocator-*
+/Makefile
+/Makefile.old
+/blib
+MYMETA.*
+!META.json
+/.prove
