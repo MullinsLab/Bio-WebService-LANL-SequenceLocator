@@ -97,7 +97,6 @@ use HTML::LinkExtor;
 use HTML::TableExtract;
 use HTTP::Request::Common;
 use List::AllUtils qw< pairwise part min max >;
-use namespace::autoclean;
 
 our $VERSION = 20140306;
 

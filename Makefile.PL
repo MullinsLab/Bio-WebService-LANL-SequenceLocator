@@ -29,7 +29,6 @@ my %WriteMakefileArgs = (
     "LWP::UserAgent" => 0,
     "List::AllUtils" => 0,
     "Moo" => 0,
-    "namespace::autoclean" => 0,
     "strictures" => 0
   },
   "TEST_REQUIRES" => {
@@ -50,7 +49,6 @@ my %FallbackPrereqs = (
   "List::AllUtils" => 0,
   "Moo" => 0,
   "Test::More" => "0.88",
-  "namespace::autoclean" => 0,
   "strictures" => 0
 );
 

@@ -6,7 +6,6 @@ requires 'HTTP::Request::Common';
 requires 'LWP::UserAgent';
 requires 'List::AllUtils';
 requires 'Moo';
-requires 'namespace::autoclean';
 requires 'strictures';
 
 feature 'server', 'Web API server' => sub {

@@ -62,7 +62,6 @@
             "LWP::UserAgent" : "0",
             "List::AllUtils" : "0",
             "Moo" : "0",
-            "namespace::autoclean" : "0",
             "perl" : "5.018",
             "strictures" : "0"
          }

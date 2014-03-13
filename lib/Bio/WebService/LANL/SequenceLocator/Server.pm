@@ -45,7 +45,6 @@ use Bio::WebService::LANL::SequenceLocator;
 use File::Share qw< dist_file >;
 use JSON qw< encode_json >;
 use Plack::App::File;
-use namespace::autoclean;
 
 has contact => (
     is      => 'ro',
