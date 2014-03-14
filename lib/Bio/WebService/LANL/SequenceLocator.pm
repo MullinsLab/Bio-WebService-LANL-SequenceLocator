@@ -48,6 +48,7 @@ the HTML itself.
           "query_sequence" : "AGCAATCAGATGGTCAGCCAAAATTGCCCTATAGTGCAGAACATCCAGGG GCAAGTGGTACATCAGGCCATATCACCTAGAACTTTAAATGCA",
           "base_type" : "nucleotide",
           "reverse_complement" : "0",
+          "alignment" : "\n Query AGCAATCAGA TGGTCAGCCA AAATTGCCCT ATAGTGCAGA ACATCCAGGG  50\n       ::::::::    ::::::::: ::::: :::: :::::::::: :::::::::: \n  HXB2 AGCAATCA-- -GGTCAGCCA AAATTACCCT ATAGTGCAGA ACATCCAGGG  1208\n\n Query GCAAGTGGTA CATCAGGCCA TATCACCTAG AACTTTAAAT GCA  93\n       :::: ::::: :::::::::: :::::::::: :::::::::: ::: \n  HXB2 GCAAATGGTA CATCAGGCCA TATCACCTAG AACTTTAAAT GCA  1251\n\n  ",
           "similarity_to_hxb2" : "94.6",
           "start" : "373"
           "end" : "462",
@@ -95,6 +96,7 @@ package Bio::WebService::LANL::SequenceLocator;
 use Moo;
 use HTML::LinkExtor;
 use HTML::TableExtract;
+use HTML::TokeParser;
 use HTTP::Request::Common;
 use List::AllUtils qw< pairwise part min max >;
 
@@ -191,9 +193,8 @@ sub submit_sequences {
     } 1 .. @$sequences;
 
     # LANL only presents the parseable table.txt we want if there's more
-    # than a single sequence...
-    $fasta .= "\n> " . $self->_bogus_slug . "\n"
-        if @$sequences == 1;
+    # than a single sequence.  We always add it so we can reliably skip it.
+    $fasta .= "\n> " . $self->_bogus_slug . "\n";
 
     return $self->_request(
         POST $self->lanl_endpoint,
@@ -216,9 +217,12 @@ sub parse_html {
     # Now parse the table data from the HTML
     my @tables = $self->parse_tables($content);
 
-    return unless @results and @tables;
+    # Extract the alignments, parsing the HTML a third time!
+    my @alignments = $self->parse_alignments($content);
 
-    unless (@results == @tables) {
+    return unless @results and @tables and @alignments;
+
+    unless (@results == @tables and @results == @alignments) {
         warn "Tab-delimited results count doesn't match parsed HTML result count.  Bug!\n";
         return;
     }
@@ -233,6 +237,8 @@ sub parse_html {
         delete $new->{$_} for qw(protein protein_start protein_end);
         $new;
     } @results, @tables;
+
+    @results = pairwise { +{ %$a, alignment => $b } } @results, @alignments;
 
     # Fill in genome start/end for amino acid sequences
     for my $r (@results) {
@@ -388,6 +394,38 @@ sub parse_tables {
     } @tables;
 
     return @tables;
+}
+
+sub parse_alignments {
+    my ($self, $content) = @_;
+    my @alignments;
+
+    my $doc = HTML::TokeParser->new(
+        \$content,
+        unbroken_text => 1,
+    );
+
+    while (my $pre = $doc->get_tag("pre")) {
+        my $text = $doc->get_text;
+        next unless defined $text;
+
+        if ($text =~ /^\s*Query\b/m and $text =~ /^\s*HXB2\b/m) {
+            push @alignments, $text;
+        }
+        elsif ($text =~ /^\s+$/) {
+            push @alignments, undef;    # We appear to have found an unaligned sequence.
+        }
+    }
+
+    if (defined $alignments[-1]) {
+        warn "Last alignment is non-null!  It should be the empty alignment of the bogus sequence.";
+        warn "Alignment is <$alignments[-1]>\n";
+        return;
+    } else {
+        pop @alignments;
+    }
+
+    return @alignments;
 }
 
 =head1 AUTHOR
