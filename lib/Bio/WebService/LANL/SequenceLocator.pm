@@ -192,9 +192,8 @@ sub submit_sequences {
     } 1 .. @$sequences;
 
     # LANL only presents the parseable table.txt we want if there's more
-    # than a single sequence...
-    $fasta .= "\n> " . $self->_bogus_slug . "\n"
-        if @$sequences == 1;
+    # than a single sequence.  We always add it so we can reliably skip it.
+    $fasta .= "\n> " . $self->_bogus_slug . "\n";
 
     return $self->_request(
         POST $self->lanl_endpoint,
@@ -415,6 +414,14 @@ sub parse_alignments {
         elsif ($text =~ /^\s+$/) {
             push @alignments, undef;    # We appear to have found an unaligned sequence.
         }
+    }
+
+    if (defined $alignments[-1]) {
+        warn "Last alignment is non-null!  It should be the empty alignment of the bogus sequence.";
+        warn "Alignment is <$alignments[-1]>\n";
+        return;
+    } else {
+        pop @alignments;
     }
 
     return @alignments;
