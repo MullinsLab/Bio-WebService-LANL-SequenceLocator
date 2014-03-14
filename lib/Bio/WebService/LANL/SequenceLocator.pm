@@ -95,6 +95,7 @@ package Bio::WebService::LANL::SequenceLocator;
 use Moo;
 use HTML::LinkExtor;
 use HTML::TableExtract;
+use HTML::TokeParser;
 use HTTP::Request::Common;
 use List::AllUtils qw< pairwise part min max >;
 
@@ -216,9 +217,12 @@ sub parse_html {
     # Now parse the table data from the HTML
     my @tables = $self->parse_tables($content);
 
-    return unless @results and @tables;
+    # Extract the alignments, parsing the HTML a third time!
+    my @alignments = $self->parse_alignments($content);
 
-    unless (@results == @tables) {
+    return unless @results and @tables and @alignments;
+
+    unless (@results == @tables and @results == @alignments) {
         warn "Tab-delimited results count doesn't match parsed HTML result count.  Bug!\n";
         return;
     }
@@ -233,6 +237,8 @@ sub parse_html {
         delete $new->{$_} for qw(protein protein_start protein_end);
         $new;
     } @results, @tables;
+
+    @results = pairwise { +{ %$a, alignment => $b } } @results, @alignments;
 
     # Fill in genome start/end for amino acid sequences
     for my $r (@results) {
@@ -388,6 +394,30 @@ sub parse_tables {
     } @tables;
 
     return @tables;
+}
+
+sub parse_alignments {
+    my ($self, $content) = @_;
+    my @alignments;
+
+    my $doc = HTML::TokeParser->new(
+        \$content,
+        unbroken_text => 1,
+    );
+
+    while (my $pre = $doc->get_tag("pre")) {
+        my $text = $doc->get_text;
+        next unless defined $text;
+
+        if ($text =~ /^\s*Query\b/m and $text =~ /^\s*HXB2\b/m) {
+            push @alignments, $text;
+        }
+        elsif ($text =~ /^\s+$/) {
+            push @alignments, undef;    # We appear to have found an unaligned sequence.
+        }
+    }
+
+    return @alignments;
 }
 
 =head1 AUTHOR

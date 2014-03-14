@@ -2,6 +2,7 @@ requires 'perl', '5.018';
 
 requires 'HTML::LinkExtor';
 requires 'HTML::TableExtract';
+requires 'HTML::TokeParser';
 requires 'HTTP::Request::Common';
 requires 'LWP::UserAgent';
 requires 'List::AllUtils';
