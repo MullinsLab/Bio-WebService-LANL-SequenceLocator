@@ -218,6 +218,11 @@ sub parse_html {
 
     return unless @results and @tables;
 
+    unless (@results == @tables) {
+        warn "Tab-delimited results count doesn't match parsed HTML result count.  Bug!\n";
+        return;
+    }
+
     @results = pairwise {
         my $new = {
             %$a,
