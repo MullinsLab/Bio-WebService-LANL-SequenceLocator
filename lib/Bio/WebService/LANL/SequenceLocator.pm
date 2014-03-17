@@ -304,6 +304,8 @@ sub parse_tsv {
 
             next if $data{query} eq $self->_bogus_slug;
 
+            $data{query_sequence} =~ s/\s+//g
+                if $data{query_sequence};
             push @these_results, \%data;
         }
 
