@@ -241,7 +241,7 @@ sub parse_html {
         $new;
     } @results, @tables;
 
-    @results = pairwise { +{ %$a, alignment => $b } } @results, @alignments;
+    @results = pairwise { +{ %$b, %$a } } @results, @alignments;
 
     # Fill in genome start/end for amino acid sequences
     for my $r (@results) {
@@ -423,7 +423,20 @@ sub parse_alignments {
         pop @alignments;
     }
 
-    return @alignments;
+    my @results;
+    for (@alignments) {
+        my @hxb2;
+        if (defined) {
+            push @hxb2, $1 =~ s/\s+//gr
+                while /^\s*HXB2\b\s+(.+?)(?:\s+\d+|\s*)$/gm;
+        }
+        push @results, {
+            alignment       => $_,
+            hxb2_sequence   => @hxb2 ? join("", @hxb2) : undef,
+        };
+    }
+
+    return @results;
 }
 
 =head1 AUTHOR
