@@ -255,13 +255,6 @@ sub parse_html {
 
         $r->{genome_start} = min map { $_->{na_from_hxb2_start}[0] } @{$r->{regions}};
         $r->{genome_end}   = max map { $_->{na_from_hxb2_start}[1] } @{$r->{regions}};
-
-        my $genome_length = $r->{genome_end} - $r->{genome_start} + 1;
-        if ((length($r->{query_sequence}) * 3) != $genome_length) {
-            warn "Detected bad genome start/end ($r->{genome_end} - $r->{genome_start} = $genome_length)",
-                 " for query <$r->{query_sequence}>?  Query length (in NA) is ",
-                 length($r->{query_sequence}) * 3;
-        }
     }
 
     return wantarray ? @results : \@results;
