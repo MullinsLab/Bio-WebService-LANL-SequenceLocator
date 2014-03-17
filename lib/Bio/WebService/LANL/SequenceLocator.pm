@@ -224,6 +224,9 @@ sub parse_html {
 
     unless (@results == @tables and @results == @alignments) {
         warn "Tab-delimited results count doesn't match parsed HTML result count.  Bug!\n";
+        warn "TSV:             ", scalar @results, "\n";
+        warn "HTML tables:     ", scalar @tables, "\n";
+        warn "HTML alignments: ", scalar @alignments, "\n";
         return;
     }
 
