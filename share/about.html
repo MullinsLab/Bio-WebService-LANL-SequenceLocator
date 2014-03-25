@@ -44,6 +44,40 @@
                     status codes are used on failure with plain text bodies
                     containing an error message.
                 </p>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>HTTP Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>405 Method Not Allowed</td>
+                            <td>The request did not use the HTTP POST method</td>
+                        </tr>
+                        <tr>
+                            <td>422 Unprocessable Entity</td>
+                            <td>No <code>sequence</code> parameter was provided</td>
+                        </tr>
+                        <tr>
+                            <td>503 Service Unavailable</td>
+                            <td>An unexpected condition occurred while parsing results from LANL</td>
+                        </tr>
+                        <tr>
+                            <td>500 Internal Server Error</td>
+                            <td>An unexpected error occurred while processing your request</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    The API tries not to return incorrect data from misparses
+                    of LANL's output.  If it detects an anomoly in any of its
+                    parsing stages, it will abort the request and return an
+                    HTTP 503 Service Unavailable.  If this happens to your
+                    request, or if you are receiving results you don't expect,
+                    please <a href="mailto:mullspt+cfar@uw.edu">let us know</a>!
+                </p>
 
                 <hr>
                 <p>
