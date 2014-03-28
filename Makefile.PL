@@ -25,6 +25,7 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "HTML::LinkExtor" => 0,
     "HTML::TableExtract" => 0,
+    "HTML::TokeParser" => 0,
     "HTTP::Request::Common" => 0,
     "LWP::UserAgent" => 0,
     "List::AllUtils" => 0,
@@ -34,7 +35,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => "0.88"
   },
-  "VERSION" => 20140306,
+  "VERSION" => 20140328,
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -44,6 +45,7 @@ my %WriteMakefileArgs = (
 my %FallbackPrereqs = (
   "HTML::LinkExtor" => 0,
   "HTML::TableExtract" => 0,
+  "HTML::TokeParser" => 0,
   "HTTP::Request::Common" => 0,
   "LWP::UserAgent" => 0,
   "List::AllUtils" => 0,

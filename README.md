@@ -43,9 +43,11 @@ the HTML itself.
     [
        {
           "query" : "sequence_1",
-          "query_sequence" : "AGCAATCAGATGGTCAGCCAAAATTGCCCTATAGTGCAGAACATCCAGGG GCAAGTGGTACATCAGGCCATATCACCTAGAACTTTAAATGCA",
+          "query_sequence" : "AGCAATCAGATGGTCAGCCAAAATTGCCCTATAGTGCAGAACATCCAGGGGCAAGTGGTACATCAGGCCATATCACCTAGAACTTTAAATGCA",
           "base_type" : "nucleotide",
           "reverse_complement" : "0",
+          "alignment" : "\n Query AGCAATCAGA TGGTCAGCCA AAATTGCCCT ATAGTGCAGA ACATCCAGGG  50\n       ::::::::    ::::::::: ::::: :::: :::::::::: :::::::::: \n  HXB2 AGCAATCA-- -GGTCAGCCA AAATTACCCT ATAGTGCAGA ACATCCAGGG  1208\n\n Query GCAAGTGGTA CATCAGGCCA TATCACCTAG AACTTTAAAT GCA  93\n       :::: ::::: :::::::::: :::::::::: :::::::::: ::: \n  HXB2 GCAAATGGTA CATCAGGCCA TATCACCTAG AACTTTAAAT GCA  1251\n\n  ",
+          "hxb2_sequence" : "AGCAATCA---GGTCAGCCAAAATTACCCTATAGTGCAGAACATCCAGGGGCAAATGGTACATCAGGCCATATCACCTAGAACTTTAAATGCA",
           "similarity_to_hxb2" : "94.6",
           "start" : "373"
           "end" : "462",
