@@ -30,6 +30,7 @@ function restart() {
             -- \
             plackup -s Starlet -E deployment \
                 -e 'enable_if { $_[0]->{REMOTE_ADDR} eq "127.0.0.1" } "ReverseProxy";' \
+                -e 'enable "CrossOrigin", origins => "*", methods => [qw(GET POST)];' \
                 --max-workers=10 \
                 --timeout=300 \
                 -I lib \

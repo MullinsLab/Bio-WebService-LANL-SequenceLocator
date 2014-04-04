@@ -15,6 +15,7 @@ feature 'server', 'Web API server' => sub {
     requires 'JSON::XS';
     requires 'Plack::App::File';
     requires 'Plack::Middleware::ReverseProxy';
+    requires 'Plack::Middleware::CrossOrigin';
     requires 'Server::Starter';
     requires 'Starlet';
     requires 'Web::Simple';
