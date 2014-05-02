@@ -72,13 +72,13 @@ has about_page => (
 );
 
 sub dispatch_request {
-    sub (POST + /within/hiv + %@sequence~) {
-        my ($self, $sequences) = @_;
+    sub (POST + /within/hiv + %@sequence~&base~) {
+        my ($self, $sequences, $base) = @_;
 
         return error(422 => 'At least one value for "sequence" is needed.')
             unless $sequences and @$sequences;
 
-        my $results = $self->locator->find($sequences)
+        my $results = $self->locator->find($sequences, base => $base)
             or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
 
         my $json = eval { encode_json($results) };

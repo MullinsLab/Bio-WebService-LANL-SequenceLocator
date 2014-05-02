@@ -169,6 +169,16 @@ sub _request {
 Takes an array ref of sequence strings.  Sequences may be in amino acids or
 nucleotides and mixed freely.  Sequences should not be in FASTA format.
 
+If sequence bases are not clearly nucleotides or clearly amino acids, LANL
+seems to default to nucleotides.  This can be an issue for some sequences since
+the full alphabet for nucleotides overlaps with the alphabet for amino acids.
+To overcome this problem, you may specify C<< base => 'nucleotide' >>
+or C<< base => 'amino acid' >> after the array ref of sequences.  This forces
+every sequence to be interpreted as nucleotides or amino acids, so you cannot
+mix base types in your sequences if you use this option.  C<n>, C<nuc>, and
+C<nucleotides> are accepted aliases for C<nucleotide>.  C<a>, C<aa>, C<amino>,
+and C<amino acids> are accepted aliases for C<amino acid>.
+
 Returns a list of hashrefs when called in list context, otherwise returns an
 arrayref of hashrefs.
 
@@ -177,16 +187,28 @@ See L</EXAMPLE RESULTS> for the structure of the data returned.
 =cut
 
 sub find {
-    my ($self, $sequences) = @_;
+    my ($self, $sequences, %args) = @_;
 
-    my $content = $self->submit_sequences($sequences)
+    my $content = $self->submit_sequences($sequences, %args)
         or return;
 
     return $self->parse_html($content);
 }
 
 sub submit_sequences {
-    my ($self, $sequences) = @_;
+    my ($self, $sequences, %args) = @_;
+
+    if (defined $args{base}) {
+        my $base = lc $args{base};
+        if ($base =~ /^n(uc(leotides?)?)?$/i) {
+            $args{base} = 1;
+        } elsif ($base =~ /^(a(mino( acids?)?)?|aa)$/i) {
+            $args{base} = 0;
+        } else {
+            warn "Unknown base type <$args{base}>, ignoring";
+            delete $args{base};
+        }
+    }
 
     # Submit multiple sequences at once using FASTA
     my $fasta = join "\n", map {
@@ -204,6 +226,9 @@ sub submit_sequences {
             organism            => 'HIV',
             DoReverseComplement => 0,
             SEQ                 => $fasta,
+            (defined $args{base}
+                ? ( base => $args{base} )
+                : ()),
         ],
     );
 }

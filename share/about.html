@@ -39,6 +39,20 @@
                     sequence and the same sequence as nucleotides.
                 </p>
                 <p>
+                    Optionally accepts a (<em>highly recommended</em>) <code>base</code>
+                    parameter set to <code>nucleotide</code> or <code>amino
+                    acid</code> which forces all sequences to be interpreted as
+                    the given base type.  This is necessary when submitting
+                    sequences with an ambiguous base type due to the overlap in
+                    IUPAC alphabets.  In such cases, LANL seems to assume
+                    nucleotides, potentially producing incorrect results.  For
+                    example, the amino acid sequence <code>MGGDMKDNW</code> is
+                    also a valid nucleotide sequence, albeit one many ambiguous
+                    bases.  Interpreting it as nucleotides, however, is
+                    incorrect.  It is not uncommon for short amino acid
+                    peptides to exhibit this property.
+                </p>
+                <p>
                     On success (HTTP 200) the response body is a JSON array
                     of objects, one per sequence.  Both HTTP 4xx and 5xx
                     status codes are used on failure with plain text bodies
@@ -224,6 +238,11 @@ curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/withi
       ],
    }
 ]
+</pre>
+<pre>
+curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
+     --data base='amino acid' \
+     --data sequence=MGGDMKDNW
 </pre>
 
 <a name="perl"></a>
