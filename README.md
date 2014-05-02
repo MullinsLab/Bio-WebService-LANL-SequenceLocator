@@ -101,6 +101,16 @@ should be provided to identify yourself to LANL out of politeness.  See the
 Takes an array ref of sequence strings.  Sequences may be in amino acids or
 nucleotides and mixed freely.  Sequences should not be in FASTA format.
 
+If sequence bases are not clearly nucleotides or clearly amino acids, LANL
+seems to default to nucleotides.  This can be an issue for some sequences since
+the full alphabet for nucleotides overlaps with the alphabet for amino acids.
+To overcome this problem, you may specify `base => 'nucleotide'`
+or `base => 'amino acid'` after the array ref of sequences.  This forces
+every sequence to be interpreted as nucleotides or amino acids, so you cannot
+mix base types in your sequences if you use this option.  `n`, `nuc`, and
+`nucleotides` are accepted aliases for `nucleotide`.  `a`, `aa`, `amino`,
+and `amino acids` are accepted aliases for `amino acid`.
+
 Returns a list of hashrefs when called in list context, otherwise returns an
 arrayref of hashrefs.
 

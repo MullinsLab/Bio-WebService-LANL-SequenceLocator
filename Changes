@@ -2,5 +2,11 @@ Revision history for Bio-WebService-LANL-SequenceLocator
 
 {{$NEXT}}
 
+20140502  2014-05-02 16:58:44 PDT
+        - Adds optional parameter to specify the base type for all query sequences
+        - Improves extraction of alignments from LANL's HTML
+        - Adds example in R
+        - Enables CORS requests in the example API service
+
 20140328  2014-03-28 11:53:12 PDT
         - Initial release
