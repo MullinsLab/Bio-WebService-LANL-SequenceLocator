@@ -429,15 +429,26 @@ sub parse_alignments {
         unbroken_text => 1,
     );
 
-    while (my $pre = $doc->get_tag("pre")) {
+    my $expect_alignment = 0;
+
+    while (my $tag = $doc->get_tag("b", "pre")) {
+        my $name = lc $tag->[0];
         my $text = $doc->get_text;
         next unless defined $text;
 
-        if ($text =~ /^\s*Query\b/m and $text =~ /^\s*HXB2\b/m) {
-            push @alignments, $text;
-        }
-        elsif ($text =~ /^\s+$/) {
-            push @alignments, undef;    # We appear to have found an unaligned sequence.
+        # <pre>s are preceeded by a bold header, which we use as an indicator
+        if ($name eq 'b') {
+            $expect_alignment = $text =~ /Alignment\s+of\s+the\s+query\s+sequence\s+to\s+HXB2/i;
+        } elsif ($name eq 'pre') {
+            if ($text =~ /^\s*Query\b/m and $text =~ /^\s*HXB2\b/m) {
+                push @alignments, $text;
+                warn "Not expecting alignment, but found one‽"
+                    unless $expect_alignment;
+            }
+            elsif ($text =~ /^\s+$/ and $expect_alignment) {
+                push @alignments, undef;    # We appear to have found an unaligned sequence.
+            }
+            $expect_alignment = 0;
         }
     }
 
