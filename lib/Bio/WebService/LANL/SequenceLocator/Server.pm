@@ -84,24 +84,7 @@ sub dispatch_request {
     sub (POST + /within/hiv + %@sequence~&base~) {
         my ($self, $sequences, $base) = @_;
 
-        return error(422 => 'At least one value for "sequence" is needed.')
-            unless $sequences and @$sequences;
-
-        my $results = $self->locator->find($sequences, base => $base)
-            or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
-
-        my $json = eval { encode_json($results) };
-        if ($@ or not $json) {
-            warn $@ ? "Error encoding JSON response: $@\n"
-                    : "Failed to encode JSON response, but no error?!\n";
-            return error(500 => "Error encoding results to JSON.  Contact @{[ $self->contact ]}");
-        }
-
-        return [
-            200,
-            [ 'Content-type' => 'application/json' ],
-            [ $json, "\n" ],
-        ];
+        return $self->locate_sequences($sequences, $base);
     },
     sub (GET + /within/hiv) {
         error( 405 => "You must make location requests using POST." )
@@ -110,6 +93,29 @@ sub dispatch_request {
         state $about = Plack::App::File->new(file => $_[0]->about_page);
         $about;
     },
+}
+
+sub locate_sequences {
+    my ($self, $sequences, $base) = @_;
+
+    return error(422 => 'At least one value for "sequence" is needed.')
+        unless $sequences and @$sequences;
+
+    my $results = $self->locator->find($sequences, base => $base)
+        or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
+
+    my $json = eval { encode_json($results) };
+    if ($@ or not $json) {
+        warn $@ ? "Error encoding JSON response: $@\n"
+                : "Failed to encode JSON response, but no error?!\n";
+        return error(500 => "Error encoding results to JSON.  Contact @{[ $self->contact ]}");
+    }
+
+    return [
+        200,
+        [ 'Content-type' => 'application/json' ],
+        [ $json, "\n" ],
+    ];
 }
 
 sub error {
