@@ -13,6 +13,7 @@ feature 'server', 'Web API server' => sub {
     requires 'File::Share';
     requires 'JSON';
     requires 'JSON::XS';
+    requires 'Path::Tiny';
     requires 'Plack::App::File';
     requires 'Plack::Middleware::ReverseProxy';
     requires 'Plack::Middleware::CrossOrigin';

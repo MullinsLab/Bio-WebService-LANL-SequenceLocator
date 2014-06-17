@@ -32,7 +32,13 @@
                 <h3><code>POST .../within/hiv</code></h3>
                 <p>
                     Requires one or more values for the POST parameter
-                    <code>sequence</code>.  Both protein and nucleotide
+                    <code>sequence</code> <em>or</em> a single-valued
+                    <code>fasta</code> parameter as a URL-encoded string or
+                    file upload of <a href="https://en.wikipedia.org/wiki/FASTA">FASTA</a>-formatted
+                    sequences.
+                </p>
+                <p>
+                    Both protein and nucleotide
                     sequences are accepted, although the data returned varies
                     by type due to what LANL returns.  See the
                     <a href="#curl">curl example</a> which queries a protein
@@ -71,8 +77,12 @@
                             <td>The request did not use the HTTP POST method</td>
                         </tr>
                         <tr>
+                            <td>415 Unsupported Media Type</td>
+                            <td>The provided <code>fasta</code> parameter appears to be in the wrong format</td>
+                        </tr>
+                        <tr>
                             <td>422 Unprocessable Entity</td>
-                            <td>No <code>sequence</code> parameter was provided</td>
+                            <td>No <code>sequence</code> or <code>fasta</code> parameter was provided, or the parameter did not contain any sequences</td>
                         </tr>
                         <tr>
                             <td>503 Service Unavailable</td>
@@ -243,6 +253,11 @@ curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/withi
 curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
      --data base='amino acid' \
      --data sequence=MGGDMKDNW
+</pre>
+<pre>
+curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
+     --form base=nucleotide \
+     --form fasta=@<i>/path/to/your/input.fa</i>
 </pre>
 
 <a name="perl"></a>

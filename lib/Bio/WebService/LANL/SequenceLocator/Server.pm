@@ -54,6 +54,7 @@ use Bio::WebService::LANL::SequenceLocator;
 use File::Share qw< dist_file >;
 use JSON qw< encode_json >;
 use Plack::App::File;
+use Path::Tiny;
 
 has contact => (
     is      => 'ro',
@@ -81,10 +82,21 @@ has about_page => (
 );
 
 sub dispatch_request {
-    sub (POST + /within/hiv + %@sequence~&base~) {
-        my ($self, $sequences, $base) = @_;
-
-        return $self->locate_sequences($sequences, $base);
+    sub (POST + /within/hiv) {
+        sub (%fasta= + %base~) {
+            my ($self, $fasta, $base) = @_;
+            return $self->locate_sequences_from_fasta($fasta, $base);
+        },
+        sub (*fasta= + %base~) {
+            my ($self, $fasta, $base) = @_;
+            return error(422 => $fasta->reason)
+                unless $fasta->is_upload;
+            return $self->locate_sequences_from_fasta(path($fasta->path)->slurp, $base);
+        },
+        sub (%@sequence~&base~) {
+            my ($self, $sequences, $base) = @_;
+            return $self->locate_sequences($sequences, $base);
+        },
     },
     sub (GET + /within/hiv) {
         error( 405 => "You must make location requests using POST." )
@@ -93,6 +105,13 @@ sub dispatch_request {
         state $about = Plack::App::File->new(file => $_[0]->about_page);
         $about;
     },
+}
+
+sub locate_sequences_from_fasta {
+    my ($self, $fasta, $base) = @_;
+    my $sequences = $self->read_fasta(\$fasta)
+        or return error( 422 => "Couldn't parse FASTA; invalid formating?" );
+    return $self->locate_sequences($sequences, $base);
 }
 
 sub locate_sequences {
@@ -116,6 +135,19 @@ sub locate_sequences {
         [ 'Content-type' => 'application/json' ],
         [ $json, "\n" ],
     ];
+}
+
+sub read_fasta {
+    my ($self, $fasta) = @_;
+
+    # XXX TODO: preserve sequence names and use them in output?
+    my (@sequences) = map { chomp; $_ }
+                     split /^>.*\R/m, $$fasta;
+
+    # Remove any leading garbage before the first description line (usually
+    # just the empty string)
+    shift @sequences;
+    return \@sequences;
 }
 
 sub error {
