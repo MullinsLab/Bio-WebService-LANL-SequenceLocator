@@ -53,8 +53,10 @@ use Web::Simple;
 use Bio::WebService::LANL::SequenceLocator;
 use File::Share qw< dist_file >;
 use JSON qw< encode_json >;
+use Text::CSV;
 use Plack::App::File;
 use Path::Tiny;
+use IO::String;
 
 has contact => (
     is      => 'ro',
@@ -87,8 +89,8 @@ sub dispatch_request {
             my ($base, $format) = @_[1..2];
             $format ||= 'json';
             $format = lc $format;
-            return error(406 => "format '$format' is not supported; try 'json'")
-                unless $format =~ /^(json)$/;
+            return error(406 => "format '$format' is not supported; try 'json' or 'csv'")
+                unless $format =~ /^(json|csv)$/;
 
             sub (%fasta=) {
                 my ($self, $fasta) = @_;
@@ -150,6 +152,36 @@ sub format_results {
             200,
             [ 'Content-type' => 'application/json' ],
             [ $json, "\n" ],
+        ];
+    }
+    elsif ($format eq "csv") {
+        my $csv   = IO::String->new;
+        my $write = sub {
+            state $csv_writer = Text::CSV->new({ binary => 1 });
+            $csv_writer->print($csv, @_);
+            $csv->print("\n");
+        };
+
+        my @fields = qw( query_sequence base_type reverse_complement genome_start genome_end
+                         polyprotein region_names similarity_to_hxb2 alignment hxb2_sequence );
+        $write->(\@fields);
+
+        for my $query (@$results) {
+            # Trim leading/trailing whitespace
+            $query->{alignment} =~ s/^\n//gm;
+            $query->{alignment} =~ s/^\s*$//gm;
+            chomp $query->{alignment};
+
+            $query->{region_names} = join " ", @{$query->{region_names}};
+
+            $write->([ @$query{@fields} ]);
+        }
+        $csv->seek(0);
+
+        return [
+            200,
+            [ 'Content-type' => 'text/csv' ],
+            $csv,
         ];
     }
     else {
