@@ -36,6 +36,15 @@ Set the SERVER_ADMIN environment variable before starting the server to provide
 a contact address in requests to LANL and server error messages in API
 responses.
 
+=head1 INSTALLATION
+
+The prerequisites for this server are optional and are probably not installed
+by default on your computer when you install this distribution.  From a git
+checkout or tarball, you can install the necessary modules with
+L<cpanm|App::cpanminus>:
+
+    cpanm --with-all-features --installdeps .
+
 =cut
 
 package Bio::WebService::LANL::SequenceLocator::Server;
