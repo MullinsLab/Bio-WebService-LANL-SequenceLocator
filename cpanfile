@@ -11,13 +11,16 @@ requires 'strictures';
 
 feature 'server', 'Web API server' => sub {
     requires 'File::Share';
+    requires 'IO::String';
     requires 'JSON';
     requires 'JSON::XS';
+    requires 'Path::Tiny';
     requires 'Plack::App::File';
     requires 'Plack::Middleware::ReverseProxy';
     requires 'Plack::Middleware::CrossOrigin';
     requires 'Server::Starter';
     requires 'Starlet';
+    requires 'Text::CSV';
     requires 'Web::Simple';
 };
 

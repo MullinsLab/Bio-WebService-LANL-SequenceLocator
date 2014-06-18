@@ -11,6 +11,14 @@
             code {
                 color: inherit;
             }
+
+            .form-inline .form-group {
+                vertical-align: top;
+            }
+
+            .form-inline .btn {
+                margin-left: 1em;
+            }
         </style>
     </head>
     <body>
@@ -32,7 +40,13 @@
                 <h3><code>POST .../within/hiv</code></h3>
                 <p>
                     Requires one or more values for the POST parameter
-                    <code>sequence</code>.  Both protein and nucleotide
+                    <code>sequence</code> <em>or</em> a single-valued
+                    <code>fasta</code> parameter as a URL-encoded string or
+                    file upload of <a href="https://en.wikipedia.org/wiki/FASTA">FASTA</a>-formatted
+                    sequences.
+                </p>
+                <p>
+                    Both protein and nucleotide
                     sequences are accepted, although the data returned varies
                     by type due to what LANL returns.  See the
                     <a href="#curl">curl example</a> which queries a protein
@@ -58,6 +72,13 @@
                     status codes are used on failure with plain text bodies
                     containing an error message.
                 </p>
+                <p>
+                    The <code>format</code> parameter may be set to
+                    <code>csv</code> to return comma-separated values partially
+                    representating the full results.  <code>format</code> may
+                    also be explicitly set to <code>json</code>, though there is
+                    no need to as JSON is the default and will remain so.
+                </p>
                 <table class="table table-condensed">
                     <thead>
                         <tr>
@@ -71,8 +92,12 @@
                             <td>The request did not use the HTTP POST method</td>
                         </tr>
                         <tr>
+                            <td>415 Unsupported Media Type</td>
+                            <td>The provided <code>fasta</code> parameter appears to be in the wrong format</td>
+                        </tr>
+                        <tr>
                             <td>422 Unprocessable Entity</td>
-                            <td>No <code>sequence</code> parameter was provided</td>
+                            <td>No <code>sequence</code> or <code>fasta</code> parameter was provided, or the parameter did not contain any sequences</td>
                         </tr>
                         <tr>
                             <td>503 Service Unavailable</td>
@@ -92,6 +117,27 @@
                     request, or if you are receiving results you don't expect,
                     please <a href="mailto:mullspt+cfar@uw.edu">let us know</a>!
                 </p>
+
+                <h2>Quick lookup</h2>
+                <p>
+                    Submit sequences as a FASTA file and download the location
+                    results as a CSV file.  Note that the CSV does not contain
+                    all of the information the API can provide since CSV does
+                    not have standard support for nested or multi-valued data
+                    structures.  This form uses the API described above.
+                </p>
+                <form action="within/hiv" method="POST" enctype="multipart/form-data" role="form" class="form-inline">
+                    <div class="form-group">
+                        <label for="fasta-upload">FASTA file</label>
+                        <input type="file" id="fasta-upload" name="fasta" style="width: 15em"></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="base" value="nuc"> Nucleotides</label><br>
+                        <label><input type="radio" name="base" value="aa"> Amino acids</label>
+                    </div>
+                    <input type="hidden" name="format" value="csv">
+                    <button type="submit" class="btn btn-default">Submit</button>
+                </form>
 
                 <hr>
                 <p>
@@ -243,6 +289,11 @@ curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/withi
 curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
      --data base='amino acid' \
      --data sequence=MGGDMKDNW
+</pre>
+<pre>
+curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
+     --form base=nucleotide \
+     --form fasta=@<i>/path/to/your/input.fa</i>
 </pre>
 
 <a name="perl"></a>
