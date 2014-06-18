@@ -127,18 +127,29 @@ sub locate_sequences {
     my $results = $self->locator->find($sequences, base => $base)
         or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
 
-    my $json = eval { encode_json($results) };
-    if ($@ or not $json) {
-        warn $@ ? "Error encoding JSON response: $@\n"
-                : "Failed to encode JSON response, but no error?!\n";
-        return error(500 => "Error encoding results to JSON.  Contact @{[ $self->contact ]}");
-    }
+    return $self->format_results($results, 'json');
+}
 
-    return [
-        200,
-        [ 'Content-type' => 'application/json' ],
-        [ $json, "\n" ],
-    ];
+sub format_results {
+    my ($self, $results, $format) = @_;
+
+    if ($format eq "json") {
+        my $json = eval { encode_json($results) };
+        if ($@ or not $json) {
+            warn $@ ? "Error encoding JSON response: $@\n"
+                    : "Failed to encode JSON response, but no error?!\n";
+            return error(500 => "Error encoding results to JSON.  Contact @{[ $self->contact ]}");
+        }
+
+        return [
+            200,
+            [ 'Content-type' => 'application/json' ],
+            [ $json, "\n" ],
+        ];
+    }
+    else {
+        die "Unknown format";
+    }
 }
 
 sub read_fasta {
