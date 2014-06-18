@@ -11,6 +11,14 @@
             code {
                 color: inherit;
             }
+
+            .form-inline .form-group {
+                vertical-align: top;
+            }
+
+            .form-inline .btn {
+                margin-left: 1em;
+            }
         </style>
     </head>
     <body>
@@ -109,6 +117,27 @@
                     request, or if you are receiving results you don't expect,
                     please <a href="mailto:mullspt+cfar@uw.edu">let us know</a>!
                 </p>
+
+                <h2>Quick lookup</h2>
+                <p>
+                    Submit sequences as a FASTA file and download the location
+                    results as a CSV file.  Note that the CSV does not contain
+                    all of the information the API can provide since CSV does
+                    not have standard support for nested or multi-valued data
+                    structures.  This form uses the API described above.
+                </p>
+                <form action="within/hiv" method="POST" enctype="multipart/form-data" role="form" class="form-inline">
+                    <div class="form-group">
+                        <label for="fasta-upload">FASTA file</label>
+                        <input type="file" id="fasta-upload" name="fasta" style="width: 15em"></label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="radio" name="base" value="nuc"> Nucleotides</label><br>
+                        <label><input type="radio" name="base" value="aa"> Amino acids</label>
+                    </div>
+                    <input type="hidden" name="format" value="csv">
+                    <button type="submit" class="btn btn-default">Submit</button>
+                </form>
 
                 <hr>
                 <p>

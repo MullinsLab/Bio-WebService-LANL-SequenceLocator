@@ -180,7 +180,8 @@ sub format_results {
 
         return [
             200,
-            [ 'Content-type' => 'text/csv' ],
+            [ 'Content-type'        => 'text/csv',
+              'Content-disposition' => 'inline; filename="located.csv"' ],
             $csv,
         ];
     }
