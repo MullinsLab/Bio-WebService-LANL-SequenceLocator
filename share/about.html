@@ -50,7 +50,13 @@
                     sequences are accepted, although the data returned varies
                     by type due to what LANL returns.  See the
                     <a href="#curl">curl example</a> which queries a protein
-                    sequence and the same sequence as nucleotides.
+                    sequence and the same sequence as nucleotides.  If you use
+                    LANL's tool directly, the reverse complements of your
+                    sequences will also be attempted and the best matching
+                    picked; in the interests of reliability and consistency,
+                    this API tells LANL <b>not</b> to reverse complement
+                    sequences.  You should instead take care of this before
+                    submitting.
                 </p>
                 <p>
                     Optionally accepts a (<em>highly recommended</em>) <code>base</code>
