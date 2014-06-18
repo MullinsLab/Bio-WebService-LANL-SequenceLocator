@@ -83,14 +83,19 @@ has about_page => (
     builder => sub { dist_file('Bio-WebService-LANL-SequenceLocator', 'about.html') },
 );
 
+has formats => (
+    is      => 'ro',
+    default => sub { [qw( json csv )] },
+);
+
 sub dispatch_request {
     sub (POST + /within/hiv) {
         sub (%base~&format~) {
-            my ($base, $format) = @_[1..2];
+            my ($self, $base, $format) = @_;
             $format ||= 'json';
             $format = lc $format;
-            return error(406 => "format '$format' is not supported; try 'json' or 'csv'")
-                unless $format =~ /^(json|csv)$/;
+            return error(406 => "format '$format' is not supported; try one of " . join(", ", @{$self->formats}))
+                unless grep { $format eq $_ } @{$self->formats};
 
             sub (%fasta=) {
                 my ($self, $fasta) = @_;
@@ -140,54 +145,59 @@ sub locate_sequences {
 sub format_results {
     my ($self, $results, $format) = @_;
 
-    if ($format eq "json") {
-        my $json = eval { encode_json($results) };
-        if ($@ or not $json) {
-            warn $@ ? "Error encoding JSON response: $@\n"
-                    : "Failed to encode JSON response, but no error?!\n";
-            return error(500 => "Error encoding results to JSON.  Contact @{[ $self->contact ]}");
-        }
+    my $formatter = $self->can("as_$format")
+        or return error(500 => "Unknown format '$format'");
 
-        return [
-            200,
-            [ 'Content-type' => 'application/json' ],
-            [ $json, "\n" ],
-        ];
+    return $formatter->($self, $results);
+}
+
+sub as_json {
+    my ($self, $results) = @_;
+    my $json = eval { encode_json($results) };
+    if ($@ or not $json) {
+        warn $@ ? "Error encoding JSON response: $@\n"
+                : "Failed to encode JSON response, but no error?!\n";
+        return error(500 => "Error encoding results to JSON.  Contact @{[ $self->contact ]}");
     }
-    elsif ($format eq "csv") {
-        my $csv   = IO::String->new;
-        my $write = sub {
-            state $csv_writer = Text::CSV->new({ binary => 1 });
-            $csv_writer->print($csv, @_);
-            $csv->print("\n");
-        };
 
-        my @fields = qw( query_sequence base_type reverse_complement genome_start genome_end
-                         polyprotein region_names similarity_to_hxb2 alignment hxb2_sequence );
-        $write->(\@fields);
+    return [
+        200,
+        [ 'Content-type' => 'application/json' ],
+        [ $json, "\n" ],
+    ];
+}
 
-        for my $query (@$results) {
-            # Trim leading/trailing whitespace
-            $query->{alignment} =~ s/^\n//gm;
-            $query->{alignment} =~ s/^\s*$//gm;
-            chomp $query->{alignment};
+sub as_csv {
+    my ($self, $results) = @_;
+    my $csv   = IO::String->new;
+    my $write = sub {
+        state $csv_writer = Text::CSV->new({ binary => 1 });
+        $csv_writer->print($csv, @_);
+        $csv->print("\n");
+    };
 
-            $query->{region_names} = join " ", @{$query->{region_names}};
+    my @fields = qw( query_sequence base_type reverse_complement genome_start genome_end
+                     polyprotein region_names similarity_to_hxb2 alignment hxb2_sequence );
+    $write->(\@fields);
 
-            $write->([ @$query{@fields} ]);
-        }
-        $csv->seek(0);
+    for my $query (@$results) {
+        # Trim leading/trailing whitespace
+        $query->{alignment} =~ s/^\n//gm;
+        $query->{alignment} =~ s/^\s*$//gm;
+        chomp $query->{alignment};
 
-        return [
-            200,
-            [ 'Content-type'        => 'text/csv',
-              'Content-disposition' => 'inline; filename="located.csv"' ],
-            $csv,
-        ];
+        $query->{region_names} = join " ", @{$query->{region_names}};
+
+        $write->([ @$query{@fields} ]);
     }
-    else {
-        die "Unknown format";
-    }
+    $csv->seek(0);
+
+    return [
+        200,
+        [ 'Content-type'        => 'text/csv',
+          'Content-disposition' => 'inline; filename="located.csv"' ],
+        $csv,
+    ];
 }
 
 sub read_fasta {
