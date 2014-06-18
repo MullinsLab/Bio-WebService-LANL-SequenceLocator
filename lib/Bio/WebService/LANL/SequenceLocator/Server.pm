@@ -83,19 +83,23 @@ has about_page => (
 
 sub dispatch_request {
     sub (POST + /within/hiv) {
-        sub (%fasta= + %base~) {
-            my ($self, $fasta, $base) = @_;
-            return $self->locate_sequences_from_fasta($fasta, $base);
-        },
-        sub (*fasta= + %base~) {
-            my ($self, $fasta, $base) = @_;
-            return error(422 => $fasta->reason)
-                unless $fasta->is_upload;
-            return $self->locate_sequences_from_fasta(path($fasta->path)->slurp, $base);
-        },
-        sub (%@sequence~&base~) {
-            my ($self, $sequences, $base) = @_;
-            return $self->locate_sequences($sequences, $base);
+        sub (%base~) {
+            my ($base) = $_[1];
+
+            sub (%fasta=) {
+                my ($self, $fasta) = @_;
+                return $self->locate_sequences_from_fasta($fasta, $base);
+            },
+            sub (*fasta=) {
+                my ($self, $fasta) = @_;
+                return error(422 => $fasta->reason)
+                    unless $fasta->is_upload;
+                return $self->locate_sequences_from_fasta(path($fasta->path)->slurp, $base);
+            },
+            sub (%@sequence~) {
+                my ($self, $sequences) = @_;
+                return $self->locate_sequences($sequences, $base);
+            },
         },
     },
     sub (GET + /within/hiv) {
