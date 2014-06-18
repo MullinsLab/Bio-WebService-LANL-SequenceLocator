@@ -83,22 +83,26 @@ has about_page => (
 
 sub dispatch_request {
     sub (POST + /within/hiv) {
-        sub (%base~) {
-            my ($base) = $_[1];
+        sub (%base~&format~) {
+            my ($base, $format) = @_[1..2];
+            $format ||= 'json';
+            $format = lc $format;
+            return error(406 => "format '$format' is not supported; try 'json'")
+                unless $format =~ /^(json)$/;
 
             sub (%fasta=) {
                 my ($self, $fasta) = @_;
-                return $self->locate_sequences_from_fasta($fasta, $base);
+                return $self->locate_sequences_from_fasta($fasta, $base, $format);
             },
             sub (*fasta=) {
                 my ($self, $fasta) = @_;
                 return error(422 => $fasta->reason)
                     unless $fasta->is_upload;
-                return $self->locate_sequences_from_fasta(path($fasta->path)->slurp, $base);
+                return $self->locate_sequences_from_fasta(path($fasta->path)->slurp, $base, $format);
             },
             sub (%@sequence~) {
                 my ($self, $sequences) = @_;
-                return $self->locate_sequences($sequences, $base);
+                return $self->locate_sequences($sequences, $base, $format);
             },
         },
     },
@@ -112,14 +116,15 @@ sub dispatch_request {
 }
 
 sub locate_sequences_from_fasta {
-    my ($self, $fasta, $base) = @_;
+    my $self  = shift;
+    my $fasta = shift;
     my $sequences = $self->read_fasta(\$fasta)
-        or return error( 422 => "Couldn't parse FASTA; invalid formating?" );
-    return $self->locate_sequences($sequences, $base);
+        or return error( 415 => "Couldn't parse FASTA; invalid formating?" );
+    return $self->locate_sequences($sequences, @_);
 }
 
 sub locate_sequences {
-    my ($self, $sequences, $base) = @_;
+    my ($self, $sequences, $base, $format) = @_;
 
     return error(422 => 'At least one value for "sequence" is needed.')
         unless $sequences and @$sequences;
@@ -127,7 +132,7 @@ sub locate_sequences {
     my $results = $self->locator->find($sequences, base => $base)
         or return error(503 => "Backend request to LANL failed, sorry!  Contact @{[ $self->contact ]} if the problem persists.");
 
-    return $self->format_results($results, 'json');
+    return $self->format_results($results, $format);
 }
 
 sub format_results {
