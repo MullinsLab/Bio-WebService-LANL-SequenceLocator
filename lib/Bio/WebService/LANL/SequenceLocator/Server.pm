@@ -116,7 +116,7 @@ sub error {
     return [
         shift,
         [ 'Content-type' => 'text/plain' ],
-        [ join " ", @_ ]
+        [ join(" ", @_), "\n" ]
     ];
 }
 
