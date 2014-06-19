@@ -51,7 +51,7 @@ the HTML itself.
           "alignment" : "\n Query AGCAATCAGA TGGTCAGCCA AAATTGCCCT ATAGTGCAGA ACATCCAGGG  50\n       ::::::::    ::::::::: ::::: :::: :::::::::: :::::::::: \n  HXB2 AGCAATCA-- -GGTCAGCCA AAATTACCCT ATAGTGCAGA ACATCCAGGG  1208\n\n Query GCAAGTGGTA CATCAGGCCA TATCACCTAG AACTTTAAAT GCA  93\n       :::: ::::: :::::::::: :::::::::: :::::::::: ::: \n  HXB2 GCAAATGGTA CATCAGGCCA TATCACCTAG AACTTTAAAT GCA  1251\n\n  ",
           "hxb2_sequence" : "AGCAATCA---GGTCAGCCAAAATTACCCTATAGTGCAGAACATCCAGGGGCAAATGGTACATCAGGCCATATCACCTAGAACTTTAAATGCA",
           "similarity_to_hxb2" : "94.6",
-          "start" : "373"
+          "start" : "373",
           "end" : "462",
           "genome_start" : "1162",
           "genome_end" : "1251",
@@ -86,7 +86,7 @@ the HTML itself.
                 "na_from_query_start" : [ "28", "93" ],
                 "protein_translation" : "PIVQNIQGQVVHQAISPRTLNA"
              }
-          ],
+          ]
        }
     ]
 
