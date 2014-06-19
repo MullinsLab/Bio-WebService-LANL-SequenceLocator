@@ -6,7 +6,6 @@ Bio::WebService::LANL::SequenceLocator - Locate sequences within HIV using LANL'
 
     use Bio::WebService::LANL::SequenceLocator;
     
-
     my $locator = Bio::WebService::LANL::SequenceLocator->new(
         agent_string => 'Your Organization - you@example.com',
     );
@@ -14,7 +13,7 @@ Bio::WebService::LANL::SequenceLocator - Locate sequences within HIV using LANL'
         "agcaatcagatggtcagccaaaattgccctatagtgcagaacatccaggggcaagtggtacatcaggccatatcacctagaactttaaatgca",
     ]);
 
-See ["EXAMPLE RESULTS"](#EXAMPLE RESULTS) below.
+See ["EXAMPLE RESULTS"](#example-results) below.
 
 # DESCRIPTION
 
@@ -22,7 +21,7 @@ This library provides simple programmatic access to
 [LANL's HIV sequence locator](http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html)
 web tool and is also used to power
 [a simple, JSON-based web API](http://indra.mullins.microbiol.washington.edu/locate-sequence/)
-for the same tool (via [Bio::WebService::LANL::SequenceLocator::Server](http://search.cpan.org/perldoc?Bio::WebService::LANL::SequenceLocator::Server)).
+for the same tool (via [Bio::WebService::LANL::SequenceLocator::Server](https://metacpan.org/pod/Bio::WebService::LANL::SequenceLocator::Server)).
 
 Nearly all of the information output by LANL's sequence locator is parsed and
 provided by this library, though the results do vary slightly depending on the
@@ -38,7 +37,6 @@ the HTML itself.
     use JSON;
     print encode_json(\@sequences);
     
-
     __END__
     [
        {
@@ -94,7 +92,7 @@ the HTML itself.
 
 Returns a new instance of this class.  An optional parameter `agent_string`
 should be provided to identify yourself to LANL out of politeness.  See the
-["SYNOPSIS"](#SYNOPSIS) for an example.
+["SYNOPSIS"](#synopsis) for an example.
 
 ## find
 
@@ -114,7 +112,7 @@ and `amino acids` are accepted aliases for `amino acid`.
 Returns a list of hashrefs when called in list context, otherwise returns an
 arrayref of hashrefs.
 
-See ["EXAMPLE RESULTS"](#EXAMPLE RESULTS) for the structure of the data returned.
+See ["EXAMPLE RESULTS"](#example-results) for the structure of the data returned.
 
 # AUTHOR
 
