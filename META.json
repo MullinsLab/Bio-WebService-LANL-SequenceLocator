@@ -59,6 +59,7 @@
             "JSON" : "0",
             "Path::Tiny" : "0",
             "Test::Deep" : "0",
+            "Test::LongString" : "0",
             "Test::Pod" : "1.41"
          }
       },

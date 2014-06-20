@@ -33,4 +33,5 @@ on develop => sub {
     requires 'JSON';
     requires 'Path::Tiny';
     requires 'Test::Deep';
+    requires 'Test::LongString';
 };
