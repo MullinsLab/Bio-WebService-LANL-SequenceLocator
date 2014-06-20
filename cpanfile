@@ -27,3 +27,11 @@ feature 'server', 'Web API server' => sub {
 on test => sub {
     requires 'Test::More', '0.88';
 };
+
+on develop => sub {
+    requires 'FindBin';
+    requires 'JSON';
+    requires 'Path::Tiny';
+    requires 'Test::Deep';
+    requires 'Test::LongString';
+};

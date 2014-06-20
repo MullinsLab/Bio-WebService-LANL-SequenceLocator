@@ -1,8 +1,6 @@
 use strict;
 use Test::More;
-use Bio::WebService::LANL::SequenceLocator;
 
-# replace with the actual test
-ok 1;
+use_ok('Bio::WebService::LANL::SequenceLocator');
 
 done_testing;
