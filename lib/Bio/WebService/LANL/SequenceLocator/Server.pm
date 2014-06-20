@@ -190,7 +190,7 @@ sub as_csv {
 
         $write->([ @$query{@fields} ]);
     }
-    $csv->seek(0);
+    $csv->seek(0, 0);
 
     return [
         200,
