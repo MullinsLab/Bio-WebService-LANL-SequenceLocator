@@ -2,6 +2,9 @@ Revision history for Bio-WebService-LANL-SequenceLocator
 
 {{$NEXT}}
 
+20140624  2014-06-24 13:05:02 PDT
+    - CSV: Include region-relative start/end positions
+
 20140619  2014-06-19 17:39:31 PDT
     - Support FASTA input and CSV output
     - Document the status of reverse complementing (unsupported)
