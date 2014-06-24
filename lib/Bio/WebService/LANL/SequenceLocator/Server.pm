@@ -177,7 +177,7 @@ sub as_csv {
     };
 
     my @fields = qw( query_sequence base_type reverse_complement genome_start genome_end
-                     polyprotein region_names similarity_to_hxb2 alignment hxb2_sequence );
+                     polyprotein start end region_names similarity_to_hxb2 alignment hxb2_sequence );
     $write->(\@fields);
 
     for my $query (@$results) {
