@@ -7,3 +7,4 @@ MYMETA.*
 !META.json
 /.prove
 /pm_to_blib
+/.build

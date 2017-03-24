@@ -4,23 +4,23 @@
       "Thomas Sibley <trsibley@uw.edu>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Milla version v1.0.5, Dist::Zilla version 5.019, CPAN::Meta::Converter version 2.140640",
+   "generated_by" : "Dist::Zilla version 6.005, Dist::Milla version v1.0.16, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : "2"
+      "version" : 2
    },
    "name" : "Bio-WebService-LANL-SequenceLocator",
    "no_index" : {
       "directory" : [
-         "t",
-         "xt",
+         "eg",
+         "examples",
          "inc",
          "share",
-         "eg",
-         "examples"
+         "t",
+         "xt"
       ]
    },
    "optional_features" : {
@@ -49,12 +49,13 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "6.30",
+            "ExtUtils::MakeMaker" : "0",
             "File::ShareDir::Install" : "0.06"
          }
       },
       "develop" : {
          "requires" : {
+            "Dist::Milla" : "v1.0.16",
             "FindBin" : "0",
             "JSON" : "0",
             "Path::Tiny" : "0",
