@@ -95,7 +95,7 @@ sub request {
         contact => 'automated testing'
     );
     my $response = $app->run_test_request(@_);
-    note "Request failed: ", $response->status_line, "\n"
+    note "Request failed: ", $response->as_string, "\n"
         unless $response and $response->is_success;
     return $response;
 }

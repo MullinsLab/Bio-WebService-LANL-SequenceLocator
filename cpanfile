@@ -1,5 +1,6 @@
 requires 'perl', '5.018';
 
+requires 'Data::Dumper';
 requires 'HTML::LinkExtor';
 requires 'HTML::TableExtract';
 requires 'HTML::TokeParser';

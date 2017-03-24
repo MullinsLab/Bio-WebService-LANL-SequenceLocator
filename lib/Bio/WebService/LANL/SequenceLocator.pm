@@ -95,6 +95,7 @@ the HTML itself.
 package Bio::WebService::LANL::SequenceLocator;
 
 use Moo;
+use Data::Dumper;
 use HTML::LinkExtor;
 use HTML::TableExtract;
 use HTML::TokeParser;
@@ -225,7 +226,7 @@ sub submit_sequences {
         Content      => [
             organism            => 'HIV',
             DoReverseComplement => 0,
-            SEQ                 => $fasta,
+            seq_input           => $fasta,
             (defined $args{base}
                 ? ( base => $args{base} )
                 : ()),
@@ -246,13 +247,21 @@ sub parse_html {
     # Extract the alignments, parsing the HTML a third time!
     my @alignments = $self->parse_alignments($content);
 
-    return unless @results and @tables and @alignments;
+    unless (@results and @tables and @alignments) {
+        warn "Didn't find all three of TSV, tables, and alignments!\n";
+        warn "TSV:             ", scalar @results, "\n";
+        warn "HTML tables:     ", scalar @tables, "\n";
+        warn "HTML alignments: ", scalar @alignments, "\n";
+        warn "Content:\n$content\n", "=" x 80, "\n";
+        return;
+    }
 
     unless (@results == @tables and @results == @alignments) {
         warn "Tab-delimited results count doesn't match parsed HTML result count.  Bug!\n";
         warn "TSV:             ", scalar @results, "\n";
         warn "HTML tables:     ", scalar @tables, "\n";
         warn "HTML alignments: ", scalar @alignments, "\n";
+        warn "Content:\n$content\n", "=" x 80, "\n";
         return;
     }
 
@@ -416,6 +425,17 @@ sub parse_tables {
         $a->{coords}[0] <=> $b->{coords}[0]
      or $a->{coords}[1] <=> $b->{coords}[1]
     } @tables;
+
+    if (@tables > 1) {
+        unless (    $tables[-1]->{rows}[0]{na_from_query_start} eq "1 →"
+                and $tables[-1]->{rows}[0]{protein_translation} eq "X") {
+            warn "Last table appears to be real!?  It should be the bogus table of the bogus sequence.";
+            warn "Table is ", Dumper($tables[-1]), "\n";
+            return;
+        } else {
+            pop @tables;
+        }
+    }
 
     return @tables;
 }
