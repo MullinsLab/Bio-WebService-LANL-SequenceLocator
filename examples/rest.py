@@ -3,7 +3,7 @@ from urllib2 import Request, urlopen, URLError
 from urllib  import urlencode
 import json
 
-request = Request('http://indra.microbiol.washington.edu/locate-sequence/within/hiv')
+request = Request('https://indra.microbiol.washington.edu/locate-sequence/within/hiv')
 data = urlencode({
     'sequence': [
         'SLYNTVAVLYYVHQR',

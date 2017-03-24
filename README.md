@@ -20,7 +20,7 @@ See ["EXAMPLE RESULTS"](#example-results) below.
 This library provides simple programmatic access to
 [LANL's HIV sequence locator](http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html)
 web tool and is also used to power
-[a simple, JSON-based web API](http://indra.mullins.microbiol.washington.edu/locate-sequence/)
+[a simple, JSON-based web API](https://indra.mullins.microbiol.washington.edu/locate-sequence/)
 for the same tool (via [Bio::WebService::LANL::SequenceLocator::Server](https://metacpan.org/pod/Bio::WebService::LANL::SequenceLocator::Server)).
 
 Nearly all of the information output by LANL's sequence locator is parsed and

@@ -24,7 +24,7 @@ Or as a L<Server::Starter> managed service:
 =head1 DESCRIPTION
 
 This server powers
-L<a simple, JSON-based web API|http://indra.mullins.microbiol.washington.edu/locate-sequence/>
+L<a simple, JSON-based web API|https://indra.mullins.microbiol.washington.edu/locate-sequence/>
 for the L<LANL's HIV sequence locator|http://www.hiv.lanl.gov/content/sequence/LOCATE/locate.html>
 using L<Bio::WebService::LANL::SequenceLocator>.
 

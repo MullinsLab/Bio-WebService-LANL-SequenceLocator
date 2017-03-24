@@ -4,7 +4,7 @@ library("rjson")
 results = tryCatch(
   fromJSON(
     postForm(
-      "http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv",
+      "https://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv",
       sequence="SLYNTVAVLYYVHQR",
       sequence="TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG")),
   HTTPError = function(e) cat("Error making request: ", e$message),

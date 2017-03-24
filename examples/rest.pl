@@ -7,7 +7,7 @@ use LWP::UserAgent;
 
 my $agent    = LWP::UserAgent->new( agent => 'you@example.com' );
 my $response = $agent->post(
-    "http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv" => [
+    "https://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv" => [
         sequence => "TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG",
     ],
 );

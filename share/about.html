@@ -163,7 +163,7 @@
 <a name="curl"></a>
 <h3>curl</h3>
 <pre>
-curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
+curl -X POST https://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
      --data sequence=SLYNTVAVLYYVHQR \
      --data sequence=TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG
 </pre>
@@ -292,12 +292,12 @@ curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/withi
 ]
 </pre>
 <pre>
-curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
+curl -X POST https://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
      --data base='amino acid' \
      --data sequence=MGGDMKDNW
 </pre>
 <pre>
-curl -X POST http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
+curl -X POST https://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv \
      --form base=nucleotide \
      --form fasta=@<i>/path/to/your/input.fa</i>
 </pre>
@@ -336,7 +336,7 @@ use LWP::UserAgent;
 
 my $agent    = LWP::UserAgent->new( agent => 'you@example.com' );
 my $response = $agent->post(
-    "http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv" => [
+    "https://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv" => [
         sequence => "TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG",
     ],
 );
@@ -358,7 +358,7 @@ from urllib2 import Request, urlopen, URLError
 from urllib  import urlencode
 import json
 
-request = Request('http://indra.microbiol.washington.edu/locate-sequence/within/hiv')
+request = Request('https://indra.microbiol.washington.edu/locate-sequence/within/hiv')
 data = urlencode({
     'sequence': [
         'SLYNTVAVLYYVHQR',
@@ -390,7 +390,7 @@ library("rjson")
 results = tryCatch(
   fromJSON(
     postForm(
-      "http://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv",
+      "https://indra.mullins.microbiol.washington.edu/locate-sequence/within/hiv",
       sequence="SLYNTVAVLYYVHQR",
       sequence="TCATTATATAATACAGTAGCAACCCTCTATTGTGTGCATCAAAGG")),
   HTTPError = function(e) cat("Error making request: ", e$message),
