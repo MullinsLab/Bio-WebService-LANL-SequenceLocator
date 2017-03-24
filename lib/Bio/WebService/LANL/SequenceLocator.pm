@@ -102,7 +102,7 @@ use HTML::TokeParser;
 use HTTP::Request::Common;
 use List::AllUtils qw< pairwise part min max >;
 
-our $VERSION = 20140624;
+our $VERSION = 20170324;
 
 =head1 METHODS
 

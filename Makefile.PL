@@ -24,10 +24,12 @@ my %WriteMakefileArgs = (
   "MIN_PERL_VERSION" => "5.018",
   "NAME" => "Bio::WebService::LANL::SequenceLocator",
   "PREREQ_PM" => {
+    "Data::Dumper" => 0,
     "HTML::LinkExtor" => 0,
     "HTML::TableExtract" => 0,
     "HTML::TokeParser" => 0,
     "HTTP::Request::Common" => 0,
+    "LWP::Protocol::https" => 0,
     "LWP::UserAgent" => 0,
     "List::AllUtils" => 0,
     "Moo" => 0,
@@ -36,7 +38,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => "0.88"
   },
-  "VERSION" => 20140624,
+  "VERSION" => 20170324,
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -44,10 +46,12 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
+  "Data::Dumper" => 0,
   "HTML::LinkExtor" => 0,
   "HTML::TableExtract" => 0,
   "HTML::TokeParser" => 0,
   "HTTP::Request::Common" => 0,
+  "LWP::Protocol::https" => 0,
   "LWP::UserAgent" => 0,
   "List::AllUtils" => 0,
   "Moo" => 0,
