@@ -5,6 +5,7 @@ requires 'HTML::TableExtract';
 requires 'HTML::TokeParser';
 requires 'HTTP::Request::Common';
 requires 'LWP::UserAgent';
+requires 'LWP::Protocol::https';
 requires 'List::AllUtils';
 requires 'Moo';
 requires 'strictures';

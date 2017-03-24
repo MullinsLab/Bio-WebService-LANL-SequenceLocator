@@ -136,7 +136,7 @@ has agent => (
 has lanl_base => (
     is      => 'ro',
     lazy    => 1,
-    builder => sub { 'http://www.hiv.lanl.gov' },
+    builder => sub { 'https://www.hiv.lanl.gov' },
 );
 
 has lanl_endpoint => (
